@@ -26,7 +26,7 @@ export default function ItemCard({ item }: ItemCardProps) {
                     <View className={daysBubbleColor(item)}>
                         <Text className="text-white text-xl font-bold">{daysLeft}</Text>
                     </View>
-                    <Text>{Math.abs(daysLeft) == 1? "Day": "Days"}</Text>
+                    <Text>{Math.abs(daysLeft) === 1? "Day": "Days"}</Text>
                 </View>
                 <Ionicons name={"chevron-down-outline"} color={"#9ca3af"} size={30} /> 
             </View>

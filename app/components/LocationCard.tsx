@@ -14,7 +14,7 @@ interface locationCardProps {
 }
 
 function bottomRow(numNearExpired: number, numExpired: number) {
-    if (numNearExpired == 0 && numExpired == 0)
+    if (numNearExpired === 0 && numExpired === 0)
         return (
             <Text className='text-l text-gray-500 pb-2 text-pretty'>Nothing close or expired, nice!</Text>
         );
@@ -30,7 +30,7 @@ export default function LocationCard({ location, iconName }: locationCardProps) 
     let items  = groceries.pantry;
     if (location === "Fridge")
         items = groceries.fridge
-    if (location == "Freezer")
+    if (location === "Freezer")
         items = groceries.freezer
 
     const nearExpired = getItemsFromLocationCloseToExpiration(items).length;
