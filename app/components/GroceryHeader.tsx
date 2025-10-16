@@ -6,7 +6,7 @@ const total_items = getTotalItems(groceries);
 const items_near_expiration = getNumItemsCloseToExpiration(groceries);
 
 
-export const GroceryHeader = () => {
+export default function GroceryHeader() {
   return (
     <View className='' >
       <View className='pt-safe-offset-5 p-5 bg-[#41d78f] justify-between flex-row'>
