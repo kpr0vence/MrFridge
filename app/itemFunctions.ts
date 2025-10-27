@@ -47,6 +47,14 @@ export function getItemsFromLocationExpired(location: item[]): item[] {
   return to_return;
 }
 
+export function getItemsNotEaten(items: item[]) {
+  const to_return: item[] = [];
+  for (let i = 0; i < items.length; i++) {
+    if (!items[i].isEaten) to_return.push(items[i]);
+  }
+  return to_return;
+}
+
 export function getNumItemsCloseToExpiration(
   groceries: groceryContainer
 ): number {

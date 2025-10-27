@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View } from "react-native";
 import Accordion from "react-native-collapsible/Accordion";
+import { getItemsNotEaten } from "../itemFunctions";
 import { item } from "../types";
 import ItemCardContent from "./ItemCardContent";
 import ItemCardHeader from "./ItemCardHeader";
@@ -11,7 +12,7 @@ interface ItemsAccordianProps {
 
 export default function ItemsAccordian({ items }: ItemsAccordianProps) {
   const [activeSections, setActiveSections] = useState([]);
-  const sections = items;
+  const sections = getItemsNotEaten(items);
 
   function renderHeader(section: item, _: any, isActive: boolean) {
     return <ItemCardHeader item={section} isActive={isActive} />;
