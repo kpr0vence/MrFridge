@@ -17,7 +17,8 @@
   <img src="./assets/images/exampleContainerDetails.webp" alt="Example Container" style="height: 200px; border-radius: 10px;">
   <img src="./assets/images/editModal.webp" alt="Edit items modal" style="height: 200px; border-radius: 10px;">
 </div>
-<p style="text-align: end; font-style: italic;">Screenshots from the dev version of Mr. Fridge</p>
+
+*Screenshots from the dev version of Mr. Fridge*
 
 
 <div style="display: inline-flex; flex-direction: row; gap: 10px; align-items: flex-start;">
@@ -27,7 +28,9 @@
 
   <p>This view allows the user to customize the notifications they recieve from the app. The intention is to leave the user in control of how often they recieve notifications and at what time of day the notifications are issued. </p>
   <p>These notifications are sent out <strong>before</strong> the given item would go bad, giving users the forwarning they need to factor the item into their meal planning before they would have to throw it out.</p>
-  <p style="text-align: end; font-style: italic;">Screenshots from the <br/>Canva mock-up of Mr. Fridge</p>
+
+  *Screenshots from the dev version of Mr. Fridge*
+
   </div>
   <img src="./assets/images/notifsMockup.png" alt="Example Container" style="height: 400px; border-radius: 10px;">
 </div>
