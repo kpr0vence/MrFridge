@@ -53,7 +53,7 @@ export const groceries = {
 
 function getRandomDate() {
   const ranDate: Date = new Date();
-  const ranNum: number = Math.floor(Math.random() * (50 - 0 + 1));
+  const ranNum: number = Math.floor(Math.random() * (25 - 5 + 1) - 5);
   ranDate.setDate(ranDate.getDate() + ranNum);
 
   return ranDate;
