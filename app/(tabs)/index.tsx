@@ -1,6 +1,7 @@
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { Pressable, View } from "react-native";
+import { router, useFocusEffect } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import { useCallback, useEffect, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import LocationCard from "../components/LocationCard";
 import { groceries } from "../dummyData";
 import { item } from "../types";
@@ -12,7 +13,26 @@ export type LocationCard = {
   info: item[];
 };
 
+type UserType = {
+  id: number;
+  name: string;
+  email: string;
+};
+
 export default function Index() {
+  const [data, setData] = useState<UserType[]>([]);
+  const database = useSQLiteContext();
+  const loadData = async () => {
+    const result = await database.getAllAsync<UserType>("SELECT * FROM users;");
+    setData(result);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
+
   const [locations, setLocations] = useState<LocationCard[]>();
   // Below are for later use
   const [isLoading, setIsLoading] = useState(false);
@@ -64,6 +84,9 @@ export default function Index() {
           />
         </Pressable>
       ))}
+      <View className="border-4 border-black">
+        <Text>{data.toLocaleString()}</Text>
+      </View>
     </View>
   );
 }
