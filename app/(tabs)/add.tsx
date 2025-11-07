@@ -1,6 +1,6 @@
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Keyboard,
   Pressable,
@@ -11,10 +11,29 @@ import {
 } from "react-native";
 
 export default function add() {
+  const { id } = useLocalSearchParams();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
+  const [editMode, setEditMode] = useState(false);
+
   const database = useSQLiteContext();
+
+  useEffect(() => {
+    if (id) {
+      setEditMode(true);
+      loadData();
+    }
+  }, [id]);
+
+  const loadData = async () => {
+    const result = await database.getFirstAsync<{
+      name: String;
+      email: string;
+    }>("SELECT name, email FROM users WHERE id = ?;", [parseInt(id as string)]);
+    setName(result!.name as string); // Probably not best practice
+    setEmail(result!.email);
+  };
 
   const handleSubmit = async () => {
     try {
@@ -38,6 +57,19 @@ export default function add() {
     }, [])
   );
 
+  const handleUpdate = async () => {
+    try {
+      const response = await database.runAsync(
+        `UPDATE users SET name = ?, email = ? WHERE id = ?`,
+        [name, email, parseInt(id as string)]
+      );
+      console.log("Item updated successfully: ", response?.changes!);
+      router.back();
+    } catch (error) {
+      console.error("Error updating item: ", error);
+    }
+  };
+
   return (
     <TouchableWithoutFeedback
       onPress={() => Keyboard.dismiss()}
@@ -59,10 +91,21 @@ export default function add() {
           />
         </View>
         <Pressable
-          onPress={handleSubmit}
+          onPress={() => {
+            setEditMode(false);
+            router.back();
+          }}
+          className="bg-red-600 p-4 rounded-md"
+        >
+          <Text className="text-white">Cancel</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            editMode ? handleUpdate() : handleSubmit();
+          }}
           className="bg-green-600 p-4 rounded-md"
         >
-          <Text className="text-white">Add Item</Text>
+          <Text className="text-white">{editMode ? "Update" : "Add Item"}</Text>
         </Pressable>
       </View>
     </TouchableWithoutFeedback>
