@@ -13,18 +13,19 @@ export type LocationCard = {
   info: item[];
 };
 
-type UserType = {
+type ItemType = {
   id: number;
   name: string;
-  email: string;
+  expiration_date: string;
+  location_id: number;
 };
 
 export default function Index() {
-  const [data, setData] = useState<UserType[]>([]);
+  const [data, setData] = useState<ItemType[]>([]);
   const database = useSQLiteContext();
 
   const loadData = async () => {
-    const result = await database.getAllAsync<UserType>("SELECT * FROM users;");
+    const result = await database.getAllAsync<ItemType>("SELECT * FROM items;");
     setData(result);
   };
 
@@ -66,7 +67,7 @@ export default function Index() {
 
   const handleDelete = async (id: number) => {
     try {
-      await database.runAsync("DELETE FROM users WHERE id = ?;", [id]);
+      await database.runAsync("DELETE FROM items WHERE id = ?;", [id]);
       loadData(); // to redraw the guys
     } catch (error) {
       console.log(error);
@@ -94,28 +95,37 @@ export default function Index() {
           />
         </Pressable>
       ))}
+
       <View className="border-4 border-black">
         <FlatList
           data={data}
           renderItem={({ item }) => {
             return (
               <View className="flex-row justify-between pb-5">
-                <Text>{item.name}</Text>
-                <Text>{item.email}</Text>
-                <Pressable
-                  onPress={() => {
-                    router.push(`/add?id=${item.id}`);
-                  }}
-                >
-                  <Text className="bg-blue-500">Edit</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => {
-                    handleDelete(item.id);
-                  }}
-                >
-                  <Text className="bg-red-500">DELETE FOREVER</Text>
-                </Pressable>
+                <View>
+                  <Text>{item.id}</Text>
+                  <Text>{item.name}</Text>
+                </View>
+                <View>
+                  <Text>{item.expiration_date}</Text>
+                  <Text>{item.location_id}</Text>
+                </View>
+                <View className="flex-col gap-7">
+                  <Pressable
+                    onPress={() => {
+                      router.push(`/add?id=${item.id}`);
+                    }}
+                  >
+                    <Text className="bg-blue-500">Edit</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      handleDelete(item.id);
+                    }}
+                  >
+                    <Text className="bg-red-500">DELETE FOREVER</Text>
+                  </Pressable>
+                </View>
               </View>
             );
           }}

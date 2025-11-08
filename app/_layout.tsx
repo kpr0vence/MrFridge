@@ -5,9 +5,11 @@ import { Platform } from "react-native";
 import "../global.css";
 
 export default function RootLayout() {
+  // Create a database to store the groceries. The location id is limited
+  // to 1 (fridge) 2 (pantry) or 3 (freezer)
   const createDbIfNeeded = async (db: SQLiteDatabase) => {
     await db.execAsync(
-      "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT);"
+      " CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, expiration_date TEXT, location_id INTEGER CHECK (location_id IN (1, 2, 3)));"
     );
   };
 

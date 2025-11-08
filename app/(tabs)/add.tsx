@@ -13,7 +13,9 @@ import {
 export default function add() {
   const { id } = useLocalSearchParams();
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [expirationDate, setExpirationDate] = useState(new Date());
+  const [locationId, setLocationId] = useState(1);
+  const [doSubmit, setDoSubmit] = useState(false);
 
   const [editMode, setEditMode] = useState(false);
 
@@ -28,31 +30,53 @@ export default function add() {
 
   const loadData = async () => {
     const result = await database.getFirstAsync<{
-      name: String;
-      email: string;
-    }>("SELECT name, email FROM users WHERE id = ?;", [parseInt(id as string)]);
+      name: string;
+      expiration_date: string;
+      location_id: string;
+    }>("SELECT name, expiration_date, location_id FROM items WHERE id = ?;", [
+      parseInt(id as string),
+    ]);
     setName(result!.name as string); // Probably not best practice
-    setEmail(result!.email);
+    setExpirationDate(new Date(result!.expiration_date as string));
+    setLocationId(parseInt(result!.location_id as string));
   };
 
-  const handleSubmit = async () => {
-    try {
-      database.runAsync("INSERT INTO users (name, email) VALUES (?, ?);", [
-        name,
-        email,
-      ]);
-      setName("");
-      setEmail("");
-    } catch (error) {
-      console.log(error);
+  useEffect(() => {
+    if (doSubmit) {
+      console.log("New expDate: " + expirationDate);
+
+      try {
+        database.runAsync(
+          "INSERT INTO items (name, expiration_date, location_id) VALUES (?, ?, ?);",
+          [name, expirationDate.toISOString(), locationId]
+        );
+        // Restore defaults
+        setName("");
+        setExpirationDate(new Date());
+        setLocationId(1);
+      } catch (error) {
+        console.log(error);
+      }
     }
+  }, [doSubmit]);
+
+  const handleSubmit = async () => {
+    // Adding a fake number of days to the date
+    const calculatedDate = new Date();
+    calculatedDate.setDate(expirationDate.getDate() + 50);
+    console.log(
+      "New date: " + calculatedDate + " Old exp_date: " + expirationDate
+    );
+    setExpirationDate(calculatedDate);
+    setDoSubmit(true);
   };
 
   useFocusEffect(
     React.useCallback(() => {
       return () => {
         setName("");
-        setEmail("");
+        setExpirationDate(new Date());
+        setLocationId(1);
       };
     }, [])
   );
@@ -60,8 +84,8 @@ export default function add() {
   const handleUpdate = async () => {
     try {
       const response = await database.runAsync(
-        `UPDATE users SET name = ?, email = ? WHERE id = ?`,
-        [name, email, parseInt(id as string)]
+        `UPDATE items SET name = ?, expiration_date = ?, location_id = ? WHERE id = ?`,
+        [name, expirationDate.toISOString(), locationId, parseInt(id as string)]
       );
       console.log("Item updated successfully: ", response?.changes!);
       router.back();
@@ -84,9 +108,15 @@ export default function add() {
             className="rounded-md p-4 mt-0 bg-gray-200 text-xl text-gray-500"
           />
           <TextInput
-            placeholder="Email"
-            defaultValue={email}
-            onChangeText={(newText) => setEmail(newText)}
+            placeholder="Date"
+            defaultValue={expirationDate.toISOString()}
+            onChangeText={(newText) => setExpirationDate(new Date())}
+            className="rounded-md p-4 mt-0 bg-gray-200 text-xl text-gray-500"
+          />
+          <TextInput
+            placeholder="Location"
+            defaultValue={locationId.toString()}
+            onChangeText={(newText) => setLocationId(parseInt(newText))}
             className="rounded-md p-4 mt-0 bg-gray-200 text-xl text-gray-500"
           />
         </View>
