@@ -85,3 +85,19 @@ export function isNotCloseOrExpired(item: item) {
   }
   return true;
 }
+
+// *** NEW BACKEND HELPER FUNCTIONS
+/**
+ * Takes in a JS Date and calculates the difference between that date and today.
+ *
+ * Returns an integer representing the difference
+ */
+export function calculateDaysTilExp(laterDate: Date) {
+  const currentDate = new Date();
+
+  var diff = Math.abs(laterDate.getTime() - currentDate.getTime());
+  var diffDays = Math.ceil(diff / (1000 * 3600 * 24));
+
+  console.log(diffDays);
+  return diffDays;
+}

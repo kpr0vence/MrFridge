@@ -9,18 +9,26 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { calculateDaysTilExp } from "../itemFunctions";
 
 export default function add() {
-  const { id } = useLocalSearchParams();
-  const [name, setName] = useState("");
-  const [expirationDate, setExpirationDate] = useState(new Date());
-  const [locationId, setLocationId] = useState(1);
-  const [doSubmit, setDoSubmit] = useState(false);
+  const { id } = useLocalSearchParams(); // Used for the update version of the function
 
+  // Variables in control of the record values
+  // CURRENTLY: expiration date holds the date in the future the product will expire
+  //  (if given, else it holds the current day).
+  // BUT the date isn't show to the user unless updating so I may change this
+  const [name, setName] = useState("");
+  const [daysTilExp, setDaysTilExp] = useState("0");
+  const [locationId, setLocationId] = useState("1"); // Currently defaults to 1 (fridge)
+
+  // Controls if the user is updating or adding an item for the first time
   const [editMode, setEditMode] = useState(false);
 
+  // Loads the items databse into the variable
   const database = useSQLiteContext();
 
+  // Checks if the id exists, which determines if we're in "edit mode"
   useEffect(() => {
     if (id) {
       setEditMode(true);
@@ -28,6 +36,7 @@ export default function add() {
     }
   }, [id]);
 
+  // If in edit mode, this gets the values from the table associated with the id
   const loadData = async () => {
     const result = await database.getFirstAsync<{
       name: string;
@@ -37,55 +46,59 @@ export default function add() {
       parseInt(id as string),
     ]);
     setName(result!.name as string); // Probably not best practice
-    setExpirationDate(new Date(result!.expiration_date as string));
-    setLocationId(parseInt(result!.location_id as string));
+    setLocationId(result!.location_id as string);
+
+    // ! New date logic
+    const itemExpireDate = new Date(result!.expiration_date as string);
+    setDaysTilExp(calculateDaysTilExp(itemExpireDate).toString());
   };
-
-  useEffect(() => {
-    if (doSubmit) {
-      console.log("New expDate: " + expirationDate);
-
-      try {
-        database.runAsync(
-          "INSERT INTO items (name, expiration_date, location_id) VALUES (?, ?, ?);",
-          [name, expirationDate.toISOString(), locationId]
-        );
-        // Restore defaults
-        setName("");
-        setExpirationDate(new Date());
-        setLocationId(1);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  }, [doSubmit]);
 
   const handleSubmit = async () => {
-    // Adding a fake number of days to the date
-    const calculatedDate = new Date();
-    calculatedDate.setDate(expirationDate.getDate() + 50);
-    console.log(
-      "New date: " + calculatedDate + " Old exp_date: " + expirationDate
-    );
-    setExpirationDate(calculatedDate);
-    setDoSubmit(true);
+    // ! New date logic
+    const today = new Date();
+    const dateToInsert = new Date();
+    dateToInsert.setDate(today.getDate() + parseInt(daysTilExp));
+
+    try {
+      database.runAsync(
+        "INSERT INTO items (name, expiration_date, location_id) VALUES (?, ?, ?);",
+        [name, dateToInsert.toISOString(), locationId]
+      );
+      // Restore defaults
+      setName("");
+      setLocationId("1");
+
+      // ! New date logic
+      setDaysTilExp("0");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
+  // Clears values on new load of the page/screen
   useFocusEffect(
     React.useCallback(() => {
       return () => {
         setName("");
-        setExpirationDate(new Date());
-        setLocationId(1);
+        setLocationId("1");
+
+        // ! New date logic
+        setDaysTilExp("0");
       };
     }, [])
   );
 
+  // Button trigger for update
   const handleUpdate = async () => {
     try {
+      // ! New date logic
+      const today = new Date();
+      const dateToInsert = new Date();
+      dateToInsert.setDate(today.getDate() + parseInt(daysTilExp));
+
       const response = await database.runAsync(
         `UPDATE items SET name = ?, expiration_date = ?, location_id = ? WHERE id = ?`,
-        [name, expirationDate.toISOString(), locationId, parseInt(id as string)]
+        [name, dateToInsert.toISOString(), locationId, parseInt(id as string)]
       );
       console.log("Item updated successfully: ", response?.changes!);
       router.back();
@@ -94,6 +107,7 @@ export default function add() {
     }
   };
 
+  // Acutal component
   return (
     <TouchableWithoutFeedback
       onPress={() => Keyboard.dismiss()}
@@ -108,15 +122,15 @@ export default function add() {
             className="rounded-md p-4 mt-0 bg-gray-200 text-xl text-gray-500"
           />
           <TextInput
-            placeholder="Date"
-            defaultValue={expirationDate.toISOString()}
-            onChangeText={(newText) => setExpirationDate(new Date())}
+            placeholder="DaysTilExp"
+            defaultValue={daysTilExp.toString()}
+            onChangeText={(newText) => setDaysTilExp(newText)}
             className="rounded-md p-4 mt-0 bg-gray-200 text-xl text-gray-500"
           />
           <TextInput
             placeholder="Location"
             defaultValue={locationId.toString()}
-            onChangeText={(newText) => setLocationId(parseInt(newText))}
+            onChangeText={(newText) => setLocationId(newText)}
             className="rounded-md p-4 mt-0 bg-gray-200 text-xl text-gray-500"
           />
         </View>
