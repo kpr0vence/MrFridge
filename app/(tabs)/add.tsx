@@ -9,11 +9,10 @@ import {
   View,
 } from "react-native";
 import { useData } from "../DataContext";
-import { calculateDaysTilExp } from "../itemFunctions";
 
 export default function add() {
   const { id } = useLocalSearchParams(); // Used for the update version of the function
-
+  const { calculateDaysTilExp } = useData();
   const [name, setName] = useState("");
   const [daysTilExp, setDaysTilExp] = useState("0");
   const [locationId, setLocationId] = useState("1"); // Currently defaults to 1 (fridge)
@@ -32,8 +31,7 @@ export default function add() {
         if (item) {
           setName(item.name);
           setLocationId(item.location_id.toString());
-          const expDate = new Date(item.expiration_date);
-          setDaysTilExp(calculateDaysTilExp(expDate).toString());
+          setDaysTilExp(calculateDaysTilExp(item.expiration_date).toString());
         }
       })();
     }
