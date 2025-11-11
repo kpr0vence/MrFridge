@@ -1,54 +1,72 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { Modal, Pressable, Text, TextInput, View } from "react-native";
-import { item } from "../types";
+import DropDownPicker from "react-native-dropdown-picker";
+import { useData } from "../DataContext";
+import { ItemType } from "../types";
 
 interface EditItemModalProps {
   isModalVisible: boolean;
   setIsModalVisible: Dispatch<SetStateAction<boolean>>;
-  item: item;
-  setItemVar: React.Dispatch<SetStateAction<item>>;
+  item: ItemType;
 }
 
+// TODO: Fix dropdown flicker
 export default function EditItemModal({
   isModalVisible,
   setIsModalVisible,
   item,
-  setItemVar,
 }: EditItemModalProps) {
-  // Variables to track the form data
+  const { handleUpdate, calculateDaysTilExp } = useData();
+
+  // Form state
   const [name, setName] = useState(item.name || "");
-  const [daysUntilExpiration, setDaysUntilExpiration] = useState(String(9));
-  const [moveTo, setMoveTo] = useState("--Don't Move--");
+  const [daysUntilExpiration, setDaysUntilExpiration] = useState(
+    String(calculateDaysTilExp(item.expiration_date))
+  );
 
-  // On submit, we need to do minor validation (make sure I can conver to number for days),
-  // Find values that have been changed (only change those values)
-  // TODO: What do I do about redrawing the screen if name/location/days is edited?
+  // Dropdown state
+  const [open, setOpen] = useState(false);
+  const [moveTo, setMoveTo] = useState<number | null>(item.location_id || null);
+  const [items, setItems] = useState([
+    { label: "Fridge", value: 1 },
+    { label: "Pantry", value: 2 },
+    { label: "Freezer", value: 3 },
+  ]);
+
   const handleSubmit = () => {
-    const result: Record<string, any> = {};
+    const result = {
+      name: item.name,
+      daysUntilExpiration: calculateDaysTilExp(item.expiration_date),
+      moveTo: item.location_id,
+    };
 
-    if (name.trim() !== "") result.name = name.trim();
-    if (daysUntilExpiration.trim() !== "")
-      result.daysUntilExpiration = parseInt(daysUntilExpiration);
-    if (moveTo !== "--Don't Move--") result.moveTo = moveTo;
+    const trimmedName = name.trim();
+    if (trimmedName.length > 0) result.name = trimmedName;
 
-    console.log("Form data:", result); // Handle update logic
+    const trimmedDays = daysUntilExpiration.trim();
+    if (trimmedDays.length > 0) {
+      const parsedDays = parseInt(trimmedDays, 10);
+      if (!isNaN(parsedDays)) result.daysUntilExpiration = parsedDays;
+    }
 
-    // Handle updates TEMP CODE until there is a backend and server with more formal writing
-    item.name = result.name;
-    item.expireDate = makeDayXDaysAway(result.daysUntilExpiration);
-    console.log("NEW EXPIRE DATE: " + item.expireDate);
+    if (moveTo !== null) result.moveTo = moveTo;
 
-    setItemVar(item);
+    console.log("Form data being submitted:", result);
+
+    handleUpdate(
+      item.id,
+      result.name,
+      result.moveTo,
+      result.daysUntilExpiration.toString()
+    );
 
     setIsModalVisible(false);
   };
 
   const handleDiscard = () => {
-    // Reset to defaults
     setName(item.name);
-    setDaysUntilExpiration("9");
-    setMoveTo("--Don't Move--");
-
+    setDaysUntilExpiration(String(calculateDaysTilExp(item.expiration_date)));
+    setMoveTo(item.location_id || null);
     setIsModalVisible(false);
   };
 
@@ -73,7 +91,7 @@ export default function EditItemModal({
           {/* Days Until Expiration */}
           <View className="flex-row gap-4 items-center">
             <TextInput
-              className="rounded-md p-4 bg-gray-200 w-1/3 text-xl  text-gray-500"
+              className="rounded-md p-4 bg-gray-200 w-1/3 text-xl text-gray-500"
               value={daysUntilExpiration}
               onChangeText={setDaysUntilExpiration}
               keyboardType="numeric"
@@ -81,12 +99,44 @@ export default function EditItemModal({
               style={{ textAlignVertical: "center" }}
             />
             <Text className="text-gray-800 text-xl font-bold">
-              Days until Expiration
+              Days Until Expiration
             </Text>
           </View>
 
           {/* Move To Dropdown */}
-          <Text>TODO: Change location dropdown </Text>
+          <Text className="text-gray-600 text-lg font-medium mt-2">
+            Move To
+          </Text>
+          <DropDownPicker
+            open={open}
+            value={moveTo}
+            items={items}
+            setOpen={setOpen}
+            setValue={setMoveTo}
+            setItems={setItems}
+            placeholder="--Don't Move--"
+            style={{
+              backgroundColor: "#e5e7eb",
+              borderRadius: 8,
+              borderWidth: 0,
+              paddingHorizontal: 12,
+              height: 50,
+            }}
+            dropDownContainerStyle={{
+              backgroundColor: "#f9fafb",
+              borderRadius: 8,
+              borderWidth: 4,
+              borderColor: "#e5e7eb",
+            }}
+            textStyle={{
+              fontSize: 18,
+              color: "#6b7280",
+            }}
+            placeholderStyle={{
+              color: "#9ca3af",
+            }}
+            containerStyle={{ marginBottom: 16 }}
+          />
 
           {/* Buttons */}
           <View className="flex-row justify-between mt-4">
@@ -107,10 +157,4 @@ export default function EditItemModal({
       </View>
     </Modal>
   );
-}
-function makeDayXDaysAway(num: number): Date {
-  const toReturn: Date = new Date();
-  toReturn.setDate(toReturn.getDate() + num);
-
-  return toReturn;
 }

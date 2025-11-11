@@ -1,21 +1,20 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import { item } from "../types";
+import { useData } from "../DataContext";
+import { ItemType } from "../types";
 import EditItemModal from "./EditItemModal";
 
 interface ItemCardContentProps {
-  item: item;
+  item: ItemType;
 }
 
 export default function ItemCardContent({ item }: ItemCardContentProps) {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [itemVar, setItemVar] = useState<item>(item);
+  const { handleDelete } = useData();
 
   const onEatenPress = () => {
-    console.log(item.name + " was eaten!");
-    item.isEaten = true;
-    setItemVar(item);
+    handleDelete(item.id);
   };
 
   const onEditPress = () => {
@@ -40,8 +39,7 @@ export default function ItemCardContent({ item }: ItemCardContentProps) {
       <EditItemModal
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}
-        item={itemVar}
-        setItemVar={setItemVar}
+        item={item}
       />
     </View>
   );

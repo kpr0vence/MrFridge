@@ -1,21 +1,19 @@
 import { Text, View } from "react-native";
-import {
-  getItemsFromLocationCloseToExpiration,
-  getItemsFromLocationExpired,
-} from "../itemFunctions";
-import { item } from "../types";
+import { useData } from "../DataContext";
+import { ItemType } from "../types";
 
 interface itemsDisplayHeaderProps {
   locationName: string;
-  items: item[];
+  items: ItemType[];
 }
 
 export default function ItemsDisplayHeader({
   locationName,
   items,
 }: itemsDisplayHeaderProps) {
-  const nearExpired = getItemsFromLocationCloseToExpiration(items).length;
-  const expired = getItemsFromLocationExpired(items).length;
+  const { getItemsCloseToExpired, getItemsExpired } = useData();
+  const nearExpired = getItemsCloseToExpired(items).length;
+  const expired = getItemsExpired(items).length;
 
   return (
     <View className="">

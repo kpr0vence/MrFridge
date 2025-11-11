@@ -10,6 +10,9 @@ import { ItemType } from "./types";
 
 interface DataContextType {
   data: ItemType[];
+  fridge: ItemType[];
+  pantry: ItemType[];
+  freezer: ItemType[];
   handleSubmit: (
     name: string,
     locationId: string,
@@ -18,11 +21,18 @@ interface DataContextType {
   handleUpdate: (
     id: number,
     name: string,
-    locationId: string,
+    locationId: number,
     daysTilExp: string
   ) => Promise<void>;
   handleDelete: (id: number) => Promise<void>;
   getItemById: (id: number) => Promise<ItemType | null>;
+  getItemsCloseToExpired: (items: ItemType[]) => ItemType[];
+  getItemsExpired: (items: ItemType[]) => ItemType[];
+  getTotalItems: () => number;
+  getDataFromLocation: (location: string) => ItemType[];
+  calculateDaysTilExp: (expiration_date: string) => number;
+  isExpired: (item: ItemType) => boolean;
+  isCloseToExpired: (item: ItemType) => boolean;
   refresh: () => Promise<void>;
 }
 
@@ -34,10 +44,26 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
   const database = useSQLiteContext();
 
   const [data, setData] = useState<ItemType[]>([]);
+  const [fridge, setFridge] = useState<ItemType[]>([]);
+  const [pantry, setPantry] = useState<ItemType[]>([]);
+  const [freezer, setFreezer] = useState<ItemType[]>([]);
 
   const loadData = async () => {
     const result = await database.getAllAsync<ItemType>("SELECT * FROM items;");
+    const fridgeResult = await database.getAllAsync<ItemType>(
+      "SELECT * FROM items WHERE location_id = 1;"
+    );
+    const pantryResult = await database.getAllAsync<ItemType>(
+      "SELECT * FROM items WHERE location_id = 2;"
+    );
+    const freezerResult = await database.getAllAsync<ItemType>(
+      "SELECT * FROM items WHERE location_id = 3;"
+    );
+
     setData(result);
+    setFridge(fridgeResult);
+    setPantry(pantryResult);
+    setFreezer(freezerResult);
   };
 
   const handleSubmit = async (
@@ -63,7 +89,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
   const handleUpdate = async (
     id: number,
     name: string,
-    locationId: string,
+    locationId: number,
     daysTilExp: string
   ) => {
     try {
@@ -73,12 +99,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
 
       const response = await database.runAsync(
         `UPDATE items SET name = ?, expiration_date = ?, location_id = ? WHERE id = ?`,
-        [
-          name,
-          dateToInsert.toISOString(),
-          locationId,
-          parseInt(id as unknown as string),
-        ]
+        [name, dateToInsert.toISOString(), locationId, id]
       );
       // router.back();
       await loadData();
@@ -111,14 +132,83 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
     })();
   }, []);
 
+  // Function to help get the distance between one day and the current date
+  function calculateDaysTilExp(expiration_date: string) {
+    const laterDate = new Date(expiration_date);
+
+    const currentDate = new Date();
+
+    var diff = laterDate.getTime() - currentDate.getTime();
+    var diffDays = Math.ceil(diff / (1000 * 3600 * 24));
+
+    return diffDays;
+  }
+
+  // Public to get all of the items close to expiration (can be done with .length to get the number of them)
+  function getItemsCloseToExpired(items: ItemType[]) {
+    let to_return: ItemType[] = [];
+
+    for (let i = 0; i < items.length; i++) {
+      if (isCloseToExpired(items[i])) {
+        to_return.push(items[i]);
+      }
+    }
+    return to_return;
+  }
+
+  // Same as above but for expired
+  function getItemsExpired(items: ItemType[]) {
+    let to_return: ItemType[] = [];
+
+    for (let i = 0; i < items.length; i++) {
+      if (isExpired(items[i])) {
+        to_return.push(items[i]);
+      }
+    }
+    return to_return;
+  }
+
+  // Private function to help the getItemsExpired function
+  function isExpired(item: ItemType) {
+    return calculateDaysTilExp(item.expiration_date) < 0;
+  }
+
+  // Private function to help the getItemsCloseToExpired function
+  function isCloseToExpired(item: ItemType) {
+    const dif = calculateDaysTilExp(item.expiration_date);
+    return dif <= 5 && dif >= 0;
+  }
+
+  const getTotalItems = () => {
+    return data.length;
+  };
+
+  const getDataFromLocation = (location: string) => {
+    if (location.toLowerCase() === "fridge") return fridge;
+
+    if (location.toLowerCase() === "pantry") return pantry;
+
+    return freezer;
+  };
+
   return (
     <DataContext.Provider
       value={{
         data,
+        fridge,
+        pantry,
+        freezer,
         handleSubmit,
         handleUpdate,
         getItemById,
         handleDelete,
+        getItemsCloseToExpired,
+        getItemsExpired,
+        getTotalItems,
+        getDataFromLocation,
+        calculateDaysTilExp,
+        isExpired,
+        isCloseToExpired,
         refresh: loadData,
       }}
     >
