@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import { Platform } from "react-native";
 import "../global.css";
+import { DataProvider } from "./DataContext";
 
 export default function RootLayout() {
   // Create a database to store the groceries. The location id is limited
@@ -18,16 +19,18 @@ export default function RootLayout() {
 
   return (
     <SQLiteProvider databaseName="test.db" onInit={createDbIfNeeded}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-        <Stack.Screen
-          name="itemsDisplay"
-          options={{
-            headerShown: false,
-          }}
-        />
-      </Stack>
+      <DataProvider>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+          <Stack.Screen
+            name="itemsDisplay"
+            options={{
+              headerShown: false,
+            }}
+          />
+        </Stack>
+      </DataProvider>
     </SQLiteProvider>
   );
 }
