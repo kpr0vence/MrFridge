@@ -47,4 +47,33 @@ From there, an algorithm will be applied to determine the generic product type a
 This algorithm will be trained using data from the website [www.StillTasty.com](https://www.stilltasty.com/). It will have the flexibility to adjust predictions based on the storage location of the item (fridge, freezer, or pantry).
 
 # Backend
-Development is currently ongoing for the entirety of *Mr. Fridge*, especially the backend. At the moment, I have followed [this tutorial](https://www.youtube.com/watch?v=vgPdAARd6Gw), which sets up a users table/databse. I plan to build off of this knowledge and functionality to create the tables that I need.
+The backend uses SQLite to locally store user data in a table called items. Each Item record has:
+- id
+- name
+- expiration_date
+- location_id (either 1, 2, or 3 corresponding to fridge, pantry, or freezer)
+
+ The SQLite database was set up using information from [this tutorial](https://www.youtube.com/watch?v=vgPdAARd6Gw). It creates up a users table/databse. I built off of this knowledge and functionality to create the table above. Of note: The SQLite queries are done following the proper guidelines to prevent basic SQL injection.
+
+ After establishing the database, I found that the best way to provide app-wide access to the data and associated functions *and keep the information stateful* was to create a new context, called `DataContext.tsx`. By wrapping the app in this, all components and tabs have access to the data and CRUD and other functions within `DataContext.tsx`. The component manages all SQLite queries and functions associated with the data, such as finding the number of items close to expiration.
+
+ ### SQLite and JS Date Representation
+ **Challenge**: SQLite doesn’t have a dedicated Date type. Handling dates is very important for my application, so this may be enough of an issue to find a new storage system. For now, I will create an implementation and then test it.
+
+#### How Each Displays Dates
+- JavaScript Date: `new Date();`
+- SQLite: `'YYYY-MM-DD HH:MM:SS.SSS'` 
+  - This is ISO8601, though I wonder if the timestamp part is necessary, since I just need the day. 
+  - Storing the date in a TEXT column in this format will allow me to still order by date.
+
+**JS to SQLite:** 
+```
+const jsDate = new Date();
+const sqliteTextDate = jsDate.toISOString();
+```
+
+**SQLite o JS:**
+```
+const sqliteTextDate = '2025-11-08 16:09:00.000';
+const jsDate = new Date(sqliteTextDate);
+```
