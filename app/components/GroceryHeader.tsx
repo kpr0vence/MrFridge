@@ -1,11 +1,12 @@
 import { Text, View } from "react-native";
-import { groceries } from "../dummyData";
-import { getNumItemsCloseToExpiration, getTotalItems } from "../itemFunctions";
-
-const total_items = getTotalItems(groceries);
-const items_near_expiration = getNumItemsCloseToExpiration(groceries);
+import { useData } from "../DataContext";
 
 export default function GroceryHeader() {
+  const { data, getTotalItems, getItemsCloseToExpired } = useData();
+
+  const total_items = getTotalItems();
+  const items_near_expiration = getItemsCloseToExpired(data).length;
+
   return (
     <View className="">
       <View className="pt-safe-offset-5 p-5 bg-[#41d78f] justify-between flex-row">

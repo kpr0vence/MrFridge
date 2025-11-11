@@ -47,4 +47,4 @@ From there, an algorithm will be applied to determine the generic product type a
 This algorithm will be trained using data from the website [www.StillTasty.com](https://www.stilltasty.com/). It will have the flexibility to adjust predictions based on the storage location of the item (fridge, freezer, or pantry).
 
 # Backend
-Development is currently ongoing for the entirety of *Mr. Fridge*, especially the backend. Further details will be provided as they are ironed out.
+Development is currently ongoing for the entirety of *Mr. Fridge*, especially the backend. At the moment, I have followed [this tutorial](https://www.youtube.com/watch?v=vgPdAARd6Gw), which sets up a users table/databse. I plan to build off of this knowledge and functionality to create the tables that I need.
