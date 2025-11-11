@@ -52,7 +52,12 @@ export default function add() {
 
   const onSubmit = async () => {
     if (editMode && id) {
-      await handleUpdate(parseInt(id as string), name, locationId, daysTilExp);
+      await handleUpdate(
+        parseInt(id as string),
+        name,
+        parseInt(locationId),
+        daysTilExp
+      );
     } else {
       await handleSubmit(name, locationId, daysTilExp);
     }

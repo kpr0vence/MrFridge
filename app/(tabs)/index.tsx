@@ -1,16 +1,12 @@
-import { router, useFocusEffect } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
-import { useCallback, useEffect, useState } from "react";
-import { FlatList, Pressable, Text, View } from "react-native";
+import { router } from "expo-router";
+import { Pressable, View } from "react-native";
 import LocationCard from "../components/LocationCard";
-import { groceries } from "../dummyData";
-import { item } from "../types";
+import { useData } from "../DataContext";
 
 // Define a type
 export type LocationCard = {
   name: string;
   iconName: string;
-  info: item[];
 };
 
 type ItemType = {
@@ -21,58 +17,22 @@ type ItemType = {
 };
 
 export default function Index() {
-  const [data, setData] = useState<ItemType[]>([]);
-  const database = useSQLiteContext();
+  const { data, refresh } = useData();
 
-  const loadData = async () => {
-    const result = await database.getAllAsync<ItemType>("SELECT * FROM items;");
-    setData(result);
-  };
-
-  useFocusEffect(
-    useCallback(() => {
-      loadData();
-    }, [])
-  );
-
-  const [locations, setLocations] = useState<LocationCard[]>();
-  // Below are for later use
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = () => {
-    const groceryContainers = groceries;
-    setLocations([
-      {
-        name: "Fridge",
-        iconName: "tablet-portrait-outline",
-        info: groceryContainers.freezer,
-      },
-      {
-        name: "Pantry",
-        iconName: "beaker-outline",
-        info: groceryContainers.pantry,
-      },
-      {
-        name: "Freezer",
-        iconName: "fish-outline",
-        info: groceryContainers.freezer,
-      },
-    ]);
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const handleDelete = async (id: number) => {
-    try {
-      await database.runAsync("DELETE FROM items WHERE id = ?;", [id]);
-      loadData(); // to redraw the guys
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const locations = [
+    {
+      name: "Fridge",
+      iconName: "tablet-portrait-outline",
+    },
+    {
+      name: "Pantry",
+      iconName: "beaker-outline",
+    },
+    {
+      name: "Freezer",
+      iconName: "fish-outline",
+    },
+  ];
 
   return (
     <View className="bg-gray-50 h-screen p-5 pt-10 flex-col gap-5">
@@ -95,8 +55,7 @@ export default function Index() {
           />
         </Pressable>
       ))}
-
-      <View className="border-4 border-black">
+      {/* <View className="border-4 border-black">
         <FlatList
           data={data}
           renderItem={({ item }) => {
@@ -130,7 +89,7 @@ export default function Index() {
             );
           }}
         />
-      </View>
+      </View> */}
     </View>
   );
 }
