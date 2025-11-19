@@ -1,7 +1,6 @@
 import { Stack } from "expo-router";
 // import 'react-native-reanimated';
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
-import { Platform } from "react-native";
 import "../global.css";
 import { DataProvider } from "./DataContext";
 
@@ -13,9 +12,6 @@ export default function RootLayout() {
       " CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, expiration_date TEXT, location_id INTEGER CHECK (location_id IN (1, 2, 3)));"
     );
   };
-
-  // Use in-memory DB on web to avoid NoModificationAllowedError
-  const dbName = Platform.OS === "web" ? ":memory:" : "test.db";
 
   return (
     <SQLiteProvider databaseName="test.db" onInit={createDbIfNeeded}>

@@ -1,36 +1,26 @@
 import { router } from "expo-router";
 import { Pressable, View } from "react-native";
 import LocationCard from "../components/LocationCard";
-import { useData } from "../DataContext";
 
 // Define a type
-export type LocationCard = {
-  name: string;
-  iconName: string;
-};
-
-type ItemType = {
-  id: number;
-  name: string;
-  expiration_date: string;
-  location_id: number;
-};
+// export type LocationCard = {
+//   name: string;
+//   iconName: string;
+// };
 
 export default function Index() {
-  const { data, refresh } = useData();
-
   const locations = [
     {
       name: "Fridge",
-      iconName: "tablet-portrait-outline",
+      iconName: "fridge",
     },
     {
       name: "Pantry",
-      iconName: "beaker-outline",
+      iconName: "door",
     },
     {
       name: "Freezer",
-      iconName: "fish-outline",
+      iconName: "snowflake",
     },
   ];
 
@@ -55,41 +45,6 @@ export default function Index() {
           />
         </Pressable>
       ))}
-      {/* <View className="border-4 border-black">
-        <FlatList
-          data={data}
-          renderItem={({ item }) => {
-            return (
-              <View className="flex-row justify-between pb-5">
-                <View>
-                  <Text>{item.id}</Text>
-                  <Text>{item.name}</Text>
-                </View>
-                <View>
-                  <Text>{item.expiration_date}</Text>
-                  <Text>{item.location_id}</Text>
-                </View>
-                <View className="flex-col gap-7">
-                  <Pressable
-                    onPress={() => {
-                      router.push(`/add?id=${item.id}`);
-                    }}
-                  >
-                    <Text className="bg-blue-500">Edit</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => {
-                      handleDelete(item.id);
-                    }}
-                  >
-                    <Text className="bg-red-500">DELETE FOREVER</Text>
-                  </Pressable>
-                </View>
-              </View>
-            );
-          }}
-        />
-      </View> */}
     </View>
   );
 }

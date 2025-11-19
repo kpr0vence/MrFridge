@@ -49,7 +49,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
   const [freezer, setFreezer] = useState<ItemType[]>([]);
 
   const loadData = async () => {
-    const result = await database.getAllAsync<ItemType>("SELECT * FROM items;");
+    const result = await database.getAllAsync<ItemType>(
+      "SELECT * FROM items ORDER BY expiration_date;"
+    ); // Add order by statement
     const fridgeResult = await database.getAllAsync<ItemType>(
       "SELECT * FROM items WHERE location_id = 1;"
     );
@@ -97,7 +99,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
       const dateToInsert = new Date();
       dateToInsert.setDate(today.getDate() + parseInt(daysTilExp));
 
-      const response = await database.runAsync(
+      await database.runAsync(
         `UPDATE items SET name = ?, expiration_date = ?, location_id = ? WHERE id = ?`,
         [name, dateToInsert.toISOString(), locationId, id]
       );
@@ -130,7 +132,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
     (async () => {
       await loadData();
     })();
-  }, []);
+  });
 
   // Function to help get the distance between one day and the current date
   function calculateDaysTilExp(expiration_date: string) {
@@ -138,8 +140,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
 
     const currentDate = new Date();
 
-    var diff = laterDate.getTime() - currentDate.getTime();
-    var diffDays = Math.ceil(diff / (1000 * 3600 * 24));
+    const diff = laterDate.getTime() - currentDate.getTime();
+    const diffDays = Math.ceil(diff / (1000 * 3600 * 24));
 
     return diffDays;
   }

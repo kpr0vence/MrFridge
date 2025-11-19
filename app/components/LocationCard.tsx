@@ -1,5 +1,5 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { Text, View } from "react-native";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useData } from "../DataContext";
 import ItemsExpiredBubble from "./ItemsExpiredBubble";
 import ItemsNearExpiredBubble from "./ItemsNearExpiredBubble";
@@ -38,7 +38,8 @@ export default function LocationCard({
 
   return (
     <View className="border-4 border-gray-200 rounded-lg w-full flex-row  p-2 gap-2">
-      <Ionicons name={iconName} color={"#9ca3af"} size={105} />
+      {/* <Ionicons name={iconName} color={"#9ca3af"} size={105} /> */}
+      <MaterialCommunityIcons name={iconName} color={"#9ca3af"} size={105} />
       <View className="flex-col gap-4 w-4/6">
         <View className="flex-row gap-4 items-stretch justify-between align-bot">
           <View className="flex-row gap-4 items-end align-bot ">

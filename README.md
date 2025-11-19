@@ -77,3 +77,6 @@ const sqliteTextDate = jsDate.toISOString();
 const sqliteTextDate = '2025-11-08 16:09:00.000';
 const jsDate = new Date(sqliteTextDate);
 ```
+# Exporting
+Export App: `eas update --channel default`
+<img src="./assets/images/expoGo.png" alt="Expo Go App Launch QR Code" style="height: 200px; border-radius: 10px;">
