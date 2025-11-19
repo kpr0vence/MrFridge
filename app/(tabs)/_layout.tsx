@@ -1,5 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
+import AddHeader from "../components/AddHeader";
 import CustomPlusButton from "../components/CustomPlusButton";
 import GroceryHeader from "../components/GroceryHeader";
 import NotifsHeader from "../components/NotifsHeader";
@@ -36,6 +37,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="add"
         options={({ navigation }) => ({
+          title: "Add Groceries",
+          header: () => <AddHeader />,
           tabBarLabel: "", // Hide the label for the plus button
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="add-circle" color={color} size={40} /> // Customize icon and color
