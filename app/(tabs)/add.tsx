@@ -11,7 +11,7 @@ import {
 import DropDownPicker from "react-native-dropdown-picker";
 import { useData } from "../DataContext";
 
-export default function add() {
+export default function Add() {
   const { id } = useLocalSearchParams(); // Used for the update version of the function
   const { calculateDaysTilExp } = useData();
   const [name, setName] = useState("");
@@ -45,7 +45,7 @@ export default function add() {
         }
       })();
     }
-  }, [id]);
+  }, [id, getItemById, calculateDaysTilExp]);
 
   // Clears values on new load of the page/screen
   useFocusEffect(
