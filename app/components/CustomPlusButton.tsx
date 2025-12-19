@@ -2,7 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { Pressable, View } from "react-native";
 
 type CustomPlusButtonProps = {
-  onPress: () => {};
+  onPress: () => void;
 };
 
 export default function CustomPlusButton({ onPress }: CustomPlusButtonProps) {

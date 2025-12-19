@@ -2,6 +2,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import React, {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -48,25 +49,43 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
   const [pantry, setPantry] = useState<ItemType[]>([]);
   const [freezer, setFreezer] = useState<ItemType[]>([]);
 
-  const loadData = async () => {
-    const result = await database.getAllAsync<ItemType>(
-      "SELECT * FROM items ORDER BY expiration_date;"
-    ); // Add order by statement
-    const fridgeResult = await database.getAllAsync<ItemType>(
-      "SELECT * FROM items WHERE location_id = 1;"
-    );
-    const pantryResult = await database.getAllAsync<ItemType>(
-      "SELECT * FROM items WHERE location_id = 2;"
-    );
-    const freezerResult = await database.getAllAsync<ItemType>(
-      "SELECT * FROM items WHERE location_id = 3;"
-    );
+  const loadData = useCallback(
+    async (isMounted: () => boolean) => {
+      const result = await database.getAllAsync<ItemType>(
+        "SELECT * FROM items ORDER BY expiration_date;"
+      );
+      if (!isMounted()) return;
 
-    setData(result);
-    setFridge(fridgeResult);
-    setPantry(pantryResult);
-    setFreezer(freezerResult);
-  };
+      const fridgeResult = await database.getAllAsync<ItemType>(
+        "SELECT * FROM items WHERE location_id = 1 ORDER BY expiration_date;"
+      );
+      if (!isMounted()) return;
+
+      const pantryResult = await database.getAllAsync<ItemType>(
+        "SELECT * FROM items WHERE location_id = 2 ORDER BY expiration_date;"
+      );
+      if (!isMounted()) return;
+
+      const freezerResult = await database.getAllAsync<ItemType>(
+        "SELECT * FROM items WHERE location_id = 3 ORDER BY expiration_date;"
+      );
+      if (!isMounted()) return;
+
+      setData(result);
+      setFridge(fridgeResult);
+      setPantry(pantryResult);
+      setFreezer(freezerResult);
+    },
+    [database]
+  );
+
+  useEffect(() => {
+    let mounted = true;
+    loadData(() => mounted);
+    return () => {
+      mounted = false;
+    };
+  }, [loadData]);
 
   const handleSubmit = async (
     name: string,
@@ -82,7 +101,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
         "INSERT INTO items (name, expiration_date, location_id) VALUES (?, ?, ?);",
         [name, dateToInsert.toISOString(), locationId]
       );
-      await loadData();
+      await refreshData();
     } catch (error) {
       console.log(error);
     }
@@ -104,7 +123,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
         [name, dateToInsert.toISOString(), locationId, id]
       );
       // router.back();
-      await loadData();
+      await refreshData();
     } catch (error) {
       console.error("Error updating item: ", error);
     }
@@ -122,17 +141,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
   const handleDelete = async (id: number) => {
     try {
       await database.runAsync("DELETE FROM items WHERE id = ?;", [id]);
-      loadData(); // to redraw the guys
+      await refreshData(); // to redraw the guys
     } catch (error) {
       console.log(error);
     }
   };
-
-  useEffect(() => {
-    (async () => {
-      await loadData();
-    })();
-  });
 
   // Function to help get the distance between one day and the current date
   function calculateDaysTilExp(expiration_date: string) {
@@ -193,6 +206,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
     return freezer;
   };
 
+  async function refreshData() {
+    await loadData(() => true);
+  }
+
   return (
     <DataContext.Provider
       value={{
@@ -211,7 +228,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
         calculateDaysTilExp,
         isExpired,
         isCloseToExpired,
-        refresh: loadData,
+        refresh: refreshData,
       }}
     >
       {children}
