@@ -11,7 +11,7 @@ interface ItemCardHeaderProps {
 function daysBubbleColor(
   item: ItemType,
   isExpired: (item: ItemType) => boolean,
-  isCloseToExpired: (item: ItemType) => boolean
+  isCloseToExpired: (item: ItemType) => boolean,
 ) {
   if (isExpired(item))
     return "bg-[#ff5757] rounded-full justify-center items-center h-12 w-12";
