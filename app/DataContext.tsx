@@ -17,13 +17,13 @@ interface DataContextType {
   handleSubmit: (
     name: string,
     locationId: string,
-    daysTilExp: string
+    daysTilExp: string,
   ) => Promise<void>;
   handleUpdate: (
     id: number,
     name: string,
     locationId: number,
-    daysTilExp: string
+    daysTilExp: string,
   ) => Promise<void>;
   handleDelete: (id: number) => Promise<void>;
   getItemById: (id: number) => Promise<ItemType | null>;
@@ -52,22 +52,22 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
   const loadData = useCallback(
     async (isMounted: () => boolean) => {
       const result = await database.getAllAsync<ItemType>(
-        "SELECT * FROM items ORDER BY expiration_date;"
+        "SELECT * FROM items ORDER BY expiration_date;",
       );
       if (!isMounted()) return;
 
       const fridgeResult = await database.getAllAsync<ItemType>(
-        "SELECT * FROM items WHERE location_id = 1 ORDER BY expiration_date;"
+        "SELECT * FROM items WHERE location_id = 1 ORDER BY expiration_date;",
       );
       if (!isMounted()) return;
 
       const pantryResult = await database.getAllAsync<ItemType>(
-        "SELECT * FROM items WHERE location_id = 2 ORDER BY expiration_date;"
+        "SELECT * FROM items WHERE location_id = 2 ORDER BY expiration_date;",
       );
       if (!isMounted()) return;
 
       const freezerResult = await database.getAllAsync<ItemType>(
-        "SELECT * FROM items WHERE location_id = 3 ORDER BY expiration_date;"
+        "SELECT * FROM items WHERE location_id = 3 ORDER BY expiration_date;",
       );
       if (!isMounted()) return;
 
@@ -76,7 +76,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
       setPantry(pantryResult);
       setFreezer(freezerResult);
     },
-    [database]
+    [database],
   );
 
   useEffect(() => {
@@ -90,7 +90,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
   const handleSubmit = async (
     name: string,
     locationId: string,
-    daysTilExp: string
+    daysTilExp: string,
   ) => {
     const today = new Date();
     const dateToInsert = new Date();
@@ -99,7 +99,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
     try {
       await database.runAsync(
         "INSERT INTO items (name, expiration_date, location_id) VALUES (?, ?, ?);",
-        [name, dateToInsert.toISOString(), locationId]
+        [name, dateToInsert.toISOString(), locationId],
       );
       await refreshData();
     } catch (error) {
@@ -111,7 +111,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
     id: number,
     name: string,
     locationId: number,
-    daysTilExp: string
+    daysTilExp: string,
   ) => {
     try {
       const today = new Date();
@@ -120,7 +120,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
 
       await database.runAsync(
         `UPDATE items SET name = ?, expiration_date = ?, location_id = ? WHERE id = ?`,
-        [name, dateToInsert.toISOString(), locationId, id]
+        [name, dateToInsert.toISOString(), locationId, id],
       );
       // router.back();
       await refreshData();
@@ -132,7 +132,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
   const getItemById = async (id: number) => {
     const result = await database.getFirstAsync<ItemType>(
       "SELECT name, expiration_date, location_id FROM items WHERE id = ?;",
-      [parseInt(id as unknown as string)]
+      [parseInt(id as unknown as string)],
     );
 
     return result ?? null;

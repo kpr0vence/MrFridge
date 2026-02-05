@@ -2,10 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "lib": [
-      "dom",
-      "esnext"
-    ],
+    "lib": ["dom", "esnext"],
     "jsx": "react-native",
     "allowJs": true,
     "skipLibCheck": true,
@@ -17,9 +14,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "incremental": true,
-    "types": [
-      "nativewind/types"
-    ]
+    "types": ["nativewind/types"]
   },
   "extends": "expo/tsconfig.base",
   "include": [
