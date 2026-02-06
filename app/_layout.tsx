@@ -9,7 +9,7 @@ export default function RootLayout() {
   // to 1 (fridge) 2 (pantry) or 3 (freezer)
   const createDbIfNeeded = async (db: SQLiteDatabase) => {
     await db.execAsync(
-      " CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, expiration_date TEXT, location_id INTEGER CHECK (location_id IN (1, 2, 3)));"
+      " CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, expiration_date TEXT, location_id INTEGER CHECK (location_id IN (1, 2, 3)));",
     );
   };
 
@@ -21,6 +21,18 @@ export default function RootLayout() {
           <Stack.Screen name="+not-found" />
           <Stack.Screen
             name="itemsDisplay"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="ManualAdd"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="PhotoAdd"
             options={{
               headerShown: false,
             }}
