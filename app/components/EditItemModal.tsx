@@ -21,7 +21,7 @@ export default function EditItemModal({
   // Form state
   const [name, setName] = useState(item.name || "");
   const [daysUntilExpiration, setDaysUntilExpiration] = useState(
-    String(calculateDaysTilExp(item.expiration_date))
+    String(calculateDaysTilExp(item.expiration_date)),
   );
 
   // Dropdown state
@@ -57,7 +57,7 @@ export default function EditItemModal({
       item.id,
       result.name,
       result.moveTo,
-      result.daysUntilExpiration.toString()
+      result.daysUntilExpiration.toString(),
     );
 
     setIsModalVisible(false);
