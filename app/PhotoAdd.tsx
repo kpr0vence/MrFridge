@@ -1,4 +1,5 @@
 import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Alert, Linking, Platform, View } from "react-native";
 import AddHeader from "./components/AddHeader";
@@ -68,7 +69,12 @@ export default function Camera() {
 
   const usePhoto = () => {
     if (selectedImage) {
-      alert("Continue to processing");
+      router.push({
+        pathname: "/components/ProcessImage",
+        params: {
+          data: JSON.stringify(selectedImage),
+        },
+      });
     } else {
       alert("No image selected.");
     }

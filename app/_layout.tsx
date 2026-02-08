@@ -37,6 +37,12 @@ export default function RootLayout() {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="ProcessImage"
+            options={{
+              headerShown: false,
+            }}
+          />
         </Stack>
       </DataProvider>
     </SQLiteProvider>
