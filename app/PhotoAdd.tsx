@@ -70,7 +70,7 @@ export default function Camera() {
   const usePhoto = () => {
     if (selectedImage) {
       router.push({
-        pathname: "/components/ProcessImage",
+        pathname: "/ProcessImage",
         params: {
           data: JSON.stringify(selectedImage),
         },

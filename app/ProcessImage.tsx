@@ -1,9 +1,9 @@
 import { useLocalSearchParams } from "expo-router";
-import { extractTextFromImage, isSupported } from "expo-text-extractor";
+// import { extractTextFromImage, isSupported } from "expo-text-extractor";
 import React, { useEffect, useState } from "react";
 import { Alert, Text, View } from "react-native";
-import { useData } from "../DataContext";
-import AddHeader from "./AddHeader";
+import { useData } from "./DataContext";
+import AddHeader from "./components/AddHeader";
 
 export default function ProcessImage() {
   const [result, setResult] = useState<string[]>([]);
@@ -21,10 +21,17 @@ export default function ProcessImage() {
     setIsLoading(true);
     setResult([]);
 
-    if (isSupported) {
+    // if (isSupported) {   // Commenting out code that is causing the import issue
+    if (path) {
       // Can do the OCR
       try {
-        const extractedTexts = await extractTextFromImage(path); // Function from the new library
+        // const extractedTexts = await extractTextFromImage(path); // Function from the new library
+        const extractedTexts = [
+          "A   R.w.CR.MUSHRM   1.98 B",
+          "B  LLALUMINUMFOIL   1.98 T",
+          "SC 8900 A  ADV SAVINGS     1.00",
+          "PRODUCE",
+        ];
         setResult(extractedTexts);
       } catch (error) {
         if (error instanceof Error)
@@ -47,12 +54,13 @@ export default function ProcessImage() {
 
   useEffect(() => {
     setImageUri(data ? JSON.parse(data as string) : "");
-    processImage;
+    handleProcessImage(data as string);
   }, []);
 
   return (
     <View>
       <AddHeader />
+      {/* <Text>{imageUri}</Text> */}
       <Text>{result}</Text>
     </View>
   );
