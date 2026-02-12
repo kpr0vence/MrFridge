@@ -5,6 +5,12 @@ export type ItemType = {
   location_id: number;
 };
 
+export type ItemToInsert = {
+  name: string;
+  expiration_date: string;
+  location_id: 1 | 2 | 3;
+};
+
 export type GuessType = {
   id: number;
   guessedItem: string;

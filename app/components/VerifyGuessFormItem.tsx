@@ -1,37 +1,49 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { GuessType } from "../types";
 import DialogueButtonGroup from "./DialogueButtonGroup";
 
 interface props {
   item: GuessType;
-  onConfirm: (item: GuessType) => void;
+  updateItem: (id: number, item: GuessType) => void;
+  removeItem: (id: number) => void;
 }
 
 // Renders a form item. On confirm callback function to add to parent's list
 // on delete and on confirm remove item from view
-export default function VerifyGuessFormItem({ item, onConfirm }: props) {
+export default function VerifyGuessFormItem({
+  item,
+  updateItem,
+  removeItem,
+}: props) {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
   const [name, setName] = useState<string>(item.guessedItem);
   const [estimation, setEstimation] = useState<number>(88);
   const [location, setLocation] = useState<number>(1);
 
-  function updateEstimation(name: String, location: number) {
+  function updateEstimation(name: string, location: number) {
     // Handle update logic
     setEstimation((prev) => prev + 1);
+    const newItem: GuessType = {
+      id: item.id,
+      guessedItem: name,
+      originalString: item.originalString,
+      confidence: item.confidence,
+    };
+    updateItem(item.id, newItem);
   } // Do I need both?
 
   function handleClickOff() {
     setEstimation((prev) => prev + 1);
+    const newItem: GuessType = {
+      id: item.id,
+      guessedItem: name,
+      originalString: item.originalString,
+      confidence: item.confidence,
+    };
+    updateItem(item.id, newItem);
   }
 
   function handleLocationChange(newLocation: number) {
@@ -48,12 +60,19 @@ export default function VerifyGuessFormItem({ item, onConfirm }: props) {
     }
   }
 
-  function handleConfirm(item: GuessType) {
-    onConfirm(item);
+  function handleConfirm() {
+    const newItem: GuessType = {
+      id: item.id,
+      guessedItem: name,
+      originalString: item.originalString,
+      confidence: item.confidence,
+    };
+    updateItem(item.id, newItem);
     setIsModalVisible(false);
   }
 
   function handleDelete() {
+    removeItem(item.id);
     setIsModalVisible(false);
   }
   // The delete and confrim buttons are the form submission
@@ -62,12 +81,7 @@ export default function VerifyGuessFormItem({ item, onConfirm }: props) {
   return (
     isModalVisible && (
       // Todo: Consider turning this into a modal, so it can slide in/out
-      // TODO: fix infinite scroll bug that happens when you open keyboard after "deleting/confirming" an item
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"} // or 'height', 'position'
-        key={item.id}
-        className="border-b-2 border-gray-300 mb-2"
-      >
+      <View key={item.id} className="border-b-2 border-gray-300">
         <View className="flex-row gap-3 items-center mb-4 justify-between  p-5 pb-0">
           <View className="flex-col gap-4 ">
             <View className="bg-gray-200  text-gray-500 rounded-md p-4">
@@ -109,13 +123,13 @@ export default function VerifyGuessFormItem({ item, onConfirm }: props) {
             <MaterialCommunityIcons name={"delete"} color={"#fff"} size={24} />
           </Pressable>
           <Pressable
-            onPress={() => handleConfirm(item)}
+            onPress={handleConfirm}
             className="w-1/4 p-2 rounded-full items-center justify-center bg-green-600"
           >
             <Ionicons name="checkmark" color={"#fff"} size={24} />
           </Pressable>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     )
   );
 }

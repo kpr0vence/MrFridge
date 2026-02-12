@@ -1,5 +1,7 @@
+import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { GuessType } from "../types";
 import AddHeader from "./AddHeader";
 import VerifyGuessFormItem from "./VerifyGuessFormItem";
@@ -8,26 +10,88 @@ interface props {
   guessedItems: GuessType[];
 }
 export default function DisplayResults(myProps: props) {
-  const [formItems, setFormItems] = useState<GuessType[]>([]);
+  const [itemsToSave, setItemsToSave] = useState<GuessType[]>(
+    myProps.guessedItems,
+  );
 
-  const addItem = (item: GuessType) => {
-    const updatedItems = [...formItems, item];
-    setFormItems(updatedItems);
+  // New logic: all items are in the list that we want to save
+  // onDeleteItem logic -> delete it from the list of items to save
+  // onConfrim and onHadleClickOff -> update it in the list
+
+  function removeItem(idToRemove: number) {
+    // Do stuff
+    const trimmedArr = itemsToSave.filter((item) => item.id != idToRemove);
+    console.log("Item was removed, array is: " + trimmedArr);
+    setItemsToSave(trimmedArr);
+  }
+
+  function updateItem(idToUpdate: number, newItem: GuessType) {
+    // Do stuff
+    const updatedInfoArr = itemsToSave.map((item) => {
+      return item.id == idToUpdate ? newItem : item;
+    });
+    console.log("Updated Array = " + updatedInfoArr);
+    setItemsToSave(updatedInfoArr);
+  }
+
+  const onFinalSubmit = () => {
+    // on final submit, all items remaining should be added to the form items
+    console.log(
+      "final items: [" +
+        itemsToSave.map((item) => `${item.guessedItem}, `) +
+        "]",
+    );
+    // Submission Logic
+
+    // Logic to success or error page
   };
 
+  function cancelAddItems() {
+    router.back();
+  }
+
   return (
-    <View>
+    <View className="">
       <AddHeader />
-      <View className="flex-1 min-h-screen pb-40">
-        <ScrollView className=" pb-15 flex-col gap-5 bg-white">
-          <View id="form-container?">
+      <View className="flex-1 min-h-screen pb-48">
+        <KeyboardAwareScrollView
+          enableResetScrollToCoords={false}
+          keyboardDismissMode="on-drag"
+          keyboardOpeningTime={Number.MAX_SAFE_INTEGER}
+          contentContainerStyle={{ flexGrow: 1 }} // Ensures content can grow
+          className=" flex-col gap-5 bg-white m-5 rounded-md"
+        >
+          <View id="form-container">
             {myProps.guessedItems.map((guessedItem) => {
               return (
-                <VerifyGuessFormItem item={guessedItem} onConfirm={addItem} />
+                <VerifyGuessFormItem
+                  key={guessedItem.id}
+                  item={guessedItem}
+                  updateItem={updateItem}
+                  removeItem={removeItem}
+                />
               );
             })}
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
+        <View id="finalSubmitButton" className=" flex-row gap-4 justify-center">
+          <Pressable
+            onPress={cancelAddItems}
+            className="p-4 w-1/3 rounded-md items-center justify-center bg-slate-400"
+          >
+            <Text className="text-xl text-center text-white">
+              Choose New Photo
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={onFinalSubmit}
+            className="p-4 rounded-md items-center justify-center bg-[#41d78f]"
+          >
+            <Text className="text-xl font-bold text-center text-white text-wrap w-min">
+              Confirm all Remaining {"\n"}Items
+            </Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
