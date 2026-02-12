@@ -4,3 +4,12 @@ export type ItemType = {
   expiration_date: string;
   location_id: number;
 };
+
+export type GuessType = {
+  id: number;
+  guessedItem: string;
+  originalString: String;
+  confidence: number;
+};
+
+export type LocationType = "fridge" | "freezer" | "pantry";

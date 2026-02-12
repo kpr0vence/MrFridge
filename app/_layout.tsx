@@ -38,7 +38,7 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen
-            name="ProcessImage"
+            name="ProcessDisplay"
             options={{
               headerShown: false,
             }}

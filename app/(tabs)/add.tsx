@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
+import Disclaimer from "../components/Disclaimer";
 
 export default function Add() {
   // Acutal component
@@ -28,6 +29,7 @@ export default function Add() {
           <Text className="text-white">Add by Photo</Text>
         </Pressable>
       </View>
+      <Disclaimer />
     </View>
   );
 }
