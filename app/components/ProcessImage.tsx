@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { Alert, Text, View } from "react-native";
 import process_text from "../parser";
-import { GuessType } from "../types";
-import AddHeader from "./AddHeader";
+import { GuessType } from "../utils/types";
+import AddHeader from "./headers/AddHeader";
 
 // Given an image file path, does text recognition
 interface props {

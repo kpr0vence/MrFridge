@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { View } from "react-native";
 import Accordion from "react-native-collapsible/Accordion";
-import { ItemType } from "../types";
+import { ItemType } from "../utils/types";
 import ItemCardContent from "./ItemCardContent";
-import ItemCardHeader from "./ItemCardHeader";
+import ItemCardHeader from "./headers/ItemCardHeader";
 
 interface ItemsAccordianProps {
   items: ItemType[];
@@ -24,6 +24,9 @@ export default function ItemsAccordian({ items }: ItemsAccordianProps) {
       </View>
     );
   }
+
+  // TODO: Fix bug where the edit modal doesn't update when you mark an item
+  // as eaten
   return (
     <Accordion
       align="bottom"

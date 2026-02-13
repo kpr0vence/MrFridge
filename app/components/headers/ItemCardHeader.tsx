@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Text, View } from "react-native";
-import { useData } from "../DataContext";
-import { ItemType } from "../types";
+import { useData } from "../../DataContext";
+import { ItemType } from "../../utils/types";
 
 interface ItemCardHeaderProps {
   item: ItemType;

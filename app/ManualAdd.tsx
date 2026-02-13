@@ -1,36 +1,24 @@
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  Keyboard,
-  Pressable,
-  Text,
-  TextInput,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
-import DropDownPicker from "react-native-dropdown-picker";
+import { Alert, Keyboard, TouchableWithoutFeedback, View } from "react-native";
 import { useData } from "./DataContext";
-import AddHeader from "./components/AddHeader";
-import BackButton from "./components/BackButton";
+import ManualAddForm, { ManualAddFormProps } from "./components/ManualAddForm";
+import SubmissionStatus from "./components/SubmissionStatus";
+import BackButton from "./components/buttons/BackButton";
+import AddHeader from "./components/headers/AddHeader";
 
 export default function Add() {
   const { id } = useLocalSearchParams(); // Used for the update version of the function
   const { calculateDaysTilExp } = useData();
   const [name, setName] = useState("");
-  const [moveTo, setMoveTo] = useState<number | null>(null);
-  const [daysTilExp, setDaysTilExp] = useState("0");
+  const [moveTo, setMoveTo] = useState<1 | 2 | 3 | null>(null);
+  const [daysTilExp, setDaysTilExp] = useState<string>("0");
+  const [actionSuccessful, setActionSuccessful] = useState<
+    boolean | undefined
+  >();
 
   // Controls if the user is updating or adding an item for the first time
   const [editMode, setEditMode] = useState(false);
-
-  // Dropdown state
-  const [open, setOpen] = useState(false);
-
-  const [items, setItems] = useState([
-    { label: "Fridge", value: 1 },
-    { label: "Pantry", value: 2 },
-    { label: "Freezer", value: 3 },
-  ]);
 
   const { handleSubmit, handleUpdate, getItemById } = useData();
 
@@ -40,7 +28,12 @@ export default function Add() {
       setEditMode(true);
       (async () => {
         const item = await getItemById(parseInt(id as string));
-        if (item) {
+        if (
+          item &&
+          (item.location_id == 1 ||
+            item.location_id == 2 ||
+            item.location_id == 3)
+        ) {
           setName(item.name);
           setMoveTo(item.location_id);
           setDaysTilExp(calculateDaysTilExp(item.expiration_date).toString());
@@ -60,14 +53,62 @@ export default function Add() {
     }, []),
   );
 
-  const onSubmit = async () => {
+  function actionIsSuccessful() {
+    setActionSuccessful(true);
+  }
+
+  function actionNotSuccessful() {
+    setActionSuccessful(false);
+  }
+
+  // Has behavior for failed submission AFTER param checks
+  async function submitCheckedParams() {
     if (editMode && id) {
-      await handleUpdate(parseInt(id as string), name, moveTo!, daysTilExp);
+      await handleUpdate(
+        parseInt(id as string),
+        name,
+        moveTo!,
+        daysTilExp,
+        actionIsSuccessful,
+        actionNotSuccessful,
+      );
     } else {
-      await handleSubmit(name, moveTo!.toString(), daysTilExp);
+      await handleSubmit(
+        [{ name, locationId: moveTo!, daysTilExp }],
+        actionIsSuccessful,
+        actionNotSuccessful,
+      );
     }
 
-    router.back();
+    setTimeout(() => {
+      // just until the text-recognizer library works
+      router.back();
+    }, 1000);
+  }
+
+  // Presubmit checks for bad parameters
+  const onSubmit = async () => {
+    if (name.trim() === "" || daysTilExp.trim() === "" || moveTo === null) {
+      Alert.alert("Please fill out each field.");
+      return;
+    }
+    try {
+      parseInt(daysTilExp);
+    } catch (error) {
+      Alert.alert(
+        "Please make sure the 'Days Until Expiration' field is a number",
+      );
+      return;
+    }
+    submitCheckedParams();
+  };
+
+  const myProps: ManualAddFormProps = {
+    updateName: setName,
+    daysTilExpState: { daysTilExp, setDaysTilExp },
+    editModeState: { editMode, setEditMode },
+    submit: onSubmit,
+    moveToState: { moveTo, setMoveTo },
   };
 
   // Acutal component
@@ -79,77 +120,12 @@ export default function Add() {
       <View className="flex-1 relative">
         <AddHeader />
         <View className="h-full min-h-screen flex-1 justify-start items-center">
-          <View className="bg-white p-6 mt-10 rounded-md w-4/5 flex-col gap-4">
-            <View className="flex-row items-center justify-between gap-4">
-              <Text className="text-gray-800 text-xl font-bold">Name</Text>
-              <TextInput
-                placeholder="Name"
-                defaultValue={name}
-                onChangeText={(newText) => setName(newText)}
-                className="rounded-md p-4 mt-0 bg-gray-200 text-xl text-gray-500 w-3/4"
-              />
-            </View>
-
-            <View className="flex-row gap-4 items-center">
-              <TextInput
-                placeholder="DaysTilExp"
-                defaultValue={daysTilExp.toString()}
-                onChangeText={(newText) => setDaysTilExp(newText)}
-                className="rounded-md p-4 mt-0 bg-gray-200 text-xl w-1/3 text-gray-500"
-              />
-              <Text className="text-gray-800 text-xl font-bold">
-                Days Until Expiration
-              </Text>
-            </View>
-
-            <View className="flex-row items-center justify-between gap-4">
-              <Text className="text-gray-800 text-xl font-bold">Stored In</Text>
-              <DropDownPicker
-                open={open}
-                value={moveTo}
-                items={items}
-                setOpen={setOpen}
-                setValue={setMoveTo}
-                setItems={setItems}
-                style={{
-                  backgroundColor: "#e5e7eb",
-                  borderRadius: 8,
-                  borderWidth: 0,
-                  height: 50,
-                  width: "70%",
-                }}
-                dropDownContainerStyle={{
-                  backgroundColor: "#f9fafb",
-                  borderRadius: 4,
-                  borderWidth: 4,
-                  borderColor: "#e5e7eb",
-                  width: "70%",
-                }}
-                textStyle={{
-                  fontSize: 18,
-                  color: "#6b7280",
-                }}
-              />
-            </View>
-            <View className="flex-row justify-between">
-              <Pressable
-                onPress={() => {
-                  setEditMode(false);
-                  router.back();
-                }}
-                className="bg-red-600 p-4 rounded-md"
-              >
-                <Text className="text-white">Cancel</Text>
-              </Pressable>
-              <Pressable
-                onPress={onSubmit}
-                className="bg-green-600 p-4 rounded-md"
-              >
-                <Text className="text-white">
-                  {editMode ? "Update" : "Add Item"}
-                </Text>
-              </Pressable>
-            </View>
+          <View className="bg-white p-6 mt-10 rounded-md w-4/5 ">
+            {actionSuccessful === undefined ? (
+              <ManualAddForm props={myProps} />
+            ) : (
+              <SubmissionStatus isSuccess={actionSuccessful} />
+            )}
           </View>
         </View>
         <BackButton />

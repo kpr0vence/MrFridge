@@ -2,8 +2,8 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { GuessType } from "../types";
-import AddHeader from "./AddHeader";
+import { GuessType } from "../utils/types";
+import AddHeader from "./headers/AddHeader";
 import VerifyGuessFormItem from "./VerifyGuessFormItem";
 
 interface props {
@@ -36,6 +36,12 @@ export default function DisplayResults(myProps: props) {
 
   const onFinalSubmit = () => {
     // on final submit, all items remaining should be added to the form items
+    // Final submit should also make sure no items with bad params are added
+    itemsToSave.forEach((item) =>
+      item.guessedItem.trim() === ""
+        ? console.log("Bad input found, shouldn't proceed")
+        : 0,
+    );
     console.log(
       "final items: [" +
         itemsToSave.map((item) => `${item.guessedItem}, `) +

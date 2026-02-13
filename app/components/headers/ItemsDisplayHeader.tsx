@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
-import { useData } from "../DataContext";
-import { ItemType } from "../types";
+import { useData } from "../../DataContext";
+import { ItemType } from "../../utils/types";
 
 interface itemsDisplayHeaderProps {
   locationName: string;

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { View } from "react-native";
 import DisplayResults from "./components/DisplayResults";
 import ProcessImage from "./components/ProcessImage";
-import { GuessType } from "./types";
+import { GuessType } from "./utils/types";
 
 // Handles the logic between showing ProcessImage.tsx and ConfrimItemsModal.tsx
 export default function ProcessDisplay() {

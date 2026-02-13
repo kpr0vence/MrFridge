@@ -1,9 +1,9 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Alert, Pressable, Text, TextInput, View } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { GuessType } from "../types";
-import DialogueButtonGroup from "./DialogueButtonGroup";
+import { GuessType } from "../utils/types";
+import DialogueButtonGroup from "./buttons/DialogueButtonGroup";
 
 interface props {
   item: GuessType;
@@ -36,7 +36,7 @@ export default function VerifyGuessFormItem({
   } // Do I need both?
 
   function handleClickOff() {
-    setEstimation((prev) => prev + 1);
+    setEstimation((prev) => prev + 1); // Dummy logic
     const newItem: GuessType = {
       id: item.id,
       guessedItem: name,
@@ -61,6 +61,11 @@ export default function VerifyGuessFormItem({
   }
 
   function handleConfirm() {
+    if (name.trim() === "") {
+      Alert.alert("Please fill out each field.");
+      return;
+    }
+
     const newItem: GuessType = {
       id: item.id,
       guessedItem: name,

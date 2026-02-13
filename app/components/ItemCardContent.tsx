@@ -2,7 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useData } from "../DataContext";
-import { ItemType } from "../types";
+import { ItemType } from "../utils/types";
 import EditItemModal from "./EditItemModal";
 
 interface ItemCardContentProps {
@@ -22,7 +22,7 @@ export default function ItemCardContent({ item }: ItemCardContentProps) {
   };
 
   return (
-    <View className="flex-row justify-between">
+    <View key={item.id} className="flex-row justify-between">
       <Pressable
         className="p-4 rounded-md bg-[#00bf63] flex-row gap-2 items-center w-fit"
         onPress={onEatenPress}

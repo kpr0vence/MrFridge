@@ -1,9 +1,9 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
-import AddHeader from "../components/AddHeader";
-import CustomPlusButton from "../components/CustomPlusButton";
-import GroceryHeader from "../components/GroceryHeader";
-import NotifsHeader from "../components/NotifsHeader";
+import CustomPlusButton from "../components/buttons/CustomPlusButton";
+import AddHeader from "../components/headers/AddHeader";
+import GroceryHeader from "../components/headers/GroceryHeader";
+import NotifsHeader from "../components/headers/NotifsHeader";
 
 export default function TabLayout() {
   return (
