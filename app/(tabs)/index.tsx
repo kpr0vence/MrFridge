@@ -2,12 +2,6 @@ import { router } from "expo-router";
 import { Pressable, View } from "react-native";
 import LocationCard from "../components/LocationCard";
 
-// Define a type
-// export type LocationCard = {
-//   name: string;
-//   iconName: string;
-// };
-
 export default function Index() {
   const locations = [
     {

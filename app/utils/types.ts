@@ -5,10 +5,10 @@ export type ItemType = {
   location_id: number;
 };
 
-export type ItemToInsert = {
+export type ItemToAdd = {
   name: string;
-  expiration_date: string;
-  location_id: 1 | 2 | 3;
+  locationId: 1 | 2 | 3;
+  daysTilExp: string;
 };
 
 export type GuessType = {

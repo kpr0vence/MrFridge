@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { Modal, Pressable, Text, TextInput, View } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useData } from "../DataContext";
-import { ItemType } from "../types";
+import { ItemType } from "../utils/types";
 
 interface EditItemModalProps {
   isModalVisible: boolean;
@@ -10,7 +10,6 @@ interface EditItemModalProps {
   item: ItemType;
 }
 
-// TODO: Fix dropdown flicker
 export default function EditItemModal({
   isModalVisible,
   setIsModalVisible,
@@ -76,6 +75,7 @@ export default function EditItemModal({
       transparent={true}
       visible={isModalVisible}
       onRequestClose={() => setIsModalVisible(false)}
+      key={item.id}
     >
       <View className="flex-1 items-center justify-center bg-black/50">
         <View className="bg-white p-6 rounded-md w-4/5 flex-col gap-4">

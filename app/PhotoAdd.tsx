@@ -2,10 +2,10 @@ import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Alert, Linking, Platform, View } from "react-native";
-import AddHeader from "./components/AddHeader";
-import BackButton from "./components/BackButton";
+import BackButton from "./components/buttons/BackButton";
+import PickImageButton from "./components/buttons/PickImageButton";
+import AddHeader from "./components/headers/AddHeader";
 import ImageViewer from "./components/ImageViewer";
-import PickImageButton from "./components/PickImageButton";
 
 const PlaceholderImage = require("../assets/images/mrFridgeLogo.png");
 
