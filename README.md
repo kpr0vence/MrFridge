@@ -80,3 +80,11 @@ const jsDate = new Date(sqliteTextDate);
 # Exporting
 Export App: `eas update --channel default`
 <img src="./assets/images/expoGo.png" alt="Expo Go App Launch QR Code" style="height: 200px; border-radius: 10px;">
+
+
+## Interacting with FastAPI
+1. Run the `update-env-ip.sh` script: `bash update-env-ip.sh`, which will set the host configuration parameters in your `.env` file based on your local network.
+
+2. When you run FastAPI, make sure you bind the server to 0.0.0.0 (which will work on your local computer and on the LAN like eduroam).
+
+It should work!
