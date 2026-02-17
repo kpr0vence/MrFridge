@@ -1,22 +1,22 @@
 import { router } from "expo-router";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { GuessType } from "../utils/types";
-import AddHeader from "./headers/AddHeader";
-import VerifyGuessFormItem from "./VerifyGuessFormItem";
+import AddHeader from "./components/headers/AddHeader";
+import VerifyGuessFormItem from "./components/VerifyGuessFormItem";
+import { useData } from "./DataContext";
+import { useGuessData } from "./GuessContext";
+import { GuessType, ItemToAdd } from "./utils/types";
 
-interface props {
-  guessedItems: GuessType[];
-}
-export default function DisplayResults(myProps: props) {
-  const [itemsToSave, setItemsToSave] = useState<GuessType[]>(
-    myProps.guessedItems,
-  );
+export default function DisplayResults() {
+  const { guessedItems } = useGuessData();
+  const { handleSubmit } = useData();
 
-  // New logic: all items are in the list that we want to save
-  // onDeleteItem logic -> delete it from the list of items to save
-  // onConfrim and onHadleClickOff -> update it in the list
+  const [itemsToSave, setItemsToSave] = useState<GuessType[]>(guessedItems);
+
+  useEffect(() => {
+    setItemsToSave(guessedItems);
+  }, [guessedItems]);
 
   function removeItem(idToRemove: number) {
     // Do stuff
@@ -30,26 +30,49 @@ export default function DisplayResults(myProps: props) {
     const updatedInfoArr = itemsToSave.map((item) => {
       return item.id == idToUpdate ? newItem : item;
     });
-    console.log("Updated Array = " + updatedInfoArr);
+    console.log("Update Item: ");
+    updatedInfoArr.forEach((item) =>
+      console.log(
+        `{ ${item.guessedItem}, ${item.daysTilExp}, ${item.location}}`,
+      ),
+    );
+
     setItemsToSave(updatedInfoArr);
   }
 
-  const onFinalSubmit = () => {
-    // on final submit, all items remaining should be added to the form items
-    // Final submit should also make sure no items with bad params are added
-    itemsToSave.forEach((item) =>
-      item.guessedItem.trim() === ""
-        ? console.log("Bad input found, shouldn't proceed")
-        : 0,
-    );
-    console.log(
-      "final items: [" +
-        itemsToSave.map((item) => `${item.guessedItem}, `) +
-        "]",
-    );
-    // Submission Logic
+  function makeItem(item: GuessType): ItemToAdd {
+    return {
+      name: item.guessedItem,
+      locationId: item.location,
+      daysTilExp: item.daysTilExp,
+    };
+  }
 
-    // Logic to success or error page
+  const onFinalSubmit = async () => {
+    // on finsal submit, all items remaining should be added to the form items
+    // Final submit should also make sure no items with bad params are added
+
+    const itemsToSubmit: ItemToAdd[] = itemsToSave
+      .filter((item) => item.guessedItem.trim() !== "")
+      .map((item) => makeItem(item));
+
+    await handleSubmit(
+      itemsToSubmit,
+      () => {
+        // onSuccess
+        console.log("Items saved successfully");
+        router.push({
+          pathname: "/SuccessfulSubmitMessage",
+        });
+      },
+      (error) => {
+        // onFailure
+        console.error("Failed to save items:", error);
+        router.push({
+          pathname: "/FailureSubmitMessage",
+        });
+      },
+    );
   };
 
   function cancelAddItems() {
@@ -68,7 +91,7 @@ export default function DisplayResults(myProps: props) {
           className=" flex-col gap-5 bg-white m-5 rounded-md"
         >
           <View id="form-container">
-            {myProps.guessedItems.map((guessedItem) => {
+            {itemsToSave.map((guessedItem) => {
               return (
                 <VerifyGuessFormItem
                   key={guessedItem.id}
@@ -102,14 +125,3 @@ export default function DisplayResults(myProps: props) {
     </View>
   );
 }
-
-/*
-Each item is its own form, but they all share the same submit button?
-
-- Make a copy of the incoming list that is a state variable
-- Each form modifies this sate function, using thw wisdom from stack overflow
-- OnSubmit, the (modified) values in the state variable are assigned to the static object
-
-- Then do more later
-
-*/

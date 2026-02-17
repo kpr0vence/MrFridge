@@ -14,8 +14,14 @@ export type ItemToAdd = {
 export type GuessType = {
   id: number;
   guessedItem: string;
-  originalString: String;
+  location: 1 | 2 | 3;
+  daysTilExp: string;
+};
+
+export type MatchItem = {
+  match: string;
   confidence: number;
+  isFood: boolean;
 };
 
 export type LocationType = "fridge" | "freezer" | "pantry";

@@ -1,7 +1,7 @@
 // import { extractTextFromImage, isSupported } from "expo-text-extractor";
 import React, { useEffect, useState } from "react";
 import { Alert, Text, View } from "react-native";
-import process_text from "../parser";
+import process_text from "../utils/parser";
 import { GuessType } from "../utils/types";
 import AddHeader from "./headers/AddHeader";
 
@@ -88,8 +88,8 @@ function generateFoodItemList(extractedTexts: string[]): GuessType[] {
       items.push({
         id: i,
         guessedItem: match,
-        originalString: extractedTexts[i],
-        confidence: confidence,
+        location: 1,
+        daysTilExp: "0",
       });
     }
   }

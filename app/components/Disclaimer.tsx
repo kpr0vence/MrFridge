@@ -1,4 +1,5 @@
 import { Image, Text, View } from "react-native";
+import * as Progress from "react-native-progress";
 
 // This "popup" could be changed into the "processing..." page while things are calculated
 // between getting the estimated product and finding the associated term spoilage time
@@ -13,7 +14,7 @@ export default function Disclaimer() {
         />
         <View className="w-1/2 flex-col gap-2 ">
           <Text className="text-xl">
-            Mr. Fridge has done his best to read your reciept and suggest how
+            Mr. Fridge is doing his best to read your reciept and suggest how
             long each item he found will last.{" "}
             <Text className="color-[#41d78f]">But nobody is perfect.</Text>
           </Text>
@@ -26,6 +27,19 @@ export default function Disclaimer() {
       <Text className="text-lg">
         Mr. Fridge might have missed an item! Use the plus button at the bottom
         to add an item to the list.
+      </Text>
+      <View className="w-full flex-row justify-center">
+        <Progress.Bar
+          indeterminate={true}
+          color={"#41d78f"}
+          borderWidth={2}
+          height={10}
+          width={200}
+        />
+      </View>
+      <Text className="text-md italic text-gray-400">
+        This may take a few minutes, feel free to put away your groceries while
+        Mr. Fridge works!
       </Text>
     </View>
   );

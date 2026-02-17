@@ -3,9 +3,9 @@ import { Pressable, View } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 interface props {
-  location: number;
-  setLocation: Dispatch<SetStateAction<number>>;
-  locationChange: (newLocation: number) => void;
+  location: 1 | 2 | 3;
+  setLocation: Dispatch<SetStateAction<1 | 2 | 3>>;
+  locationChange: (newLocation: 1 | 2 | 3) => void;
 }
 
 export default function DialogueButtonGroup({
@@ -18,19 +18,20 @@ export default function DialogueButtonGroup({
   // Make a state variable to track which one is toggled
   // of three options one will be toggled, the rest wont. On press, update the toggle
 
-  function determineBackgroundColor(newLocation: number) {
+  function determineBackgroundColor(newLocation: 1 | 2 | 3) {
     return newLocation === location
       ? viewDetails + " bg-[#41d78f]"
       : viewDetails + " bg-slate-200";
   }
 
-  function determineForegroundColor(newLocation: number) {
+  function determineForegroundColor(newLocation: 1 | 2 | 3) {
     return newLocation === location ? "#fff" : "#9ca3af";
   }
 
-  function handleOnPress(newLocation: number) {
+  function handleOnPress(newLocation: 1 | 2 | 3) {
     setLocation(newLocation);
     locationChange(newLocation);
+    // console.log("Location is: " + newLocation);
   }
 
   return (
