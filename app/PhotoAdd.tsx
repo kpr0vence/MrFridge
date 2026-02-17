@@ -1,13 +1,16 @@
 import Constants from "expo-constants";
-import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, Linking, Platform, View } from "react-native";
+import { Platform, View } from "react-native";
 import BackButton from "./components/buttons/BackButton";
-import PickImageButton from "./components/buttons/PickImageButton";
 import AddHeader from "./components/headers/AddHeader";
-import ImageViewer from "./components/ImageViewer";
+import ImagePickerModal from "./components/ImagePickerModal";
+import Processing from "./components/Processing";
+import { useGuessData } from "./GuessContext";
 
+// -------------------------------------
+// Helper Functions
+// -------------------------------------
 const PlaceholderImage = require("../assets/images/mrFridgeLogo.png");
 
 const DEFAULT_API_PORT = 8000;
@@ -47,10 +50,7 @@ function getApiBaseCandidates(): string[] {
   return Array.from(new Set(bases));
 }
 
-async function fetchApi(
-  path: string,
-  init: RequestInit,
-): Promise<Response> {
+async function fetchApi(path: string, init: RequestInit): Promise<Response> {
   let lastErr: unknown;
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
@@ -68,191 +68,86 @@ async function fetchApi(
   throw lastErr ?? new Error("Network request failed");
 }
 
-export default function Camera() {
+// -------------------------------------
+// Main Component
+//  -------------------------------------
+export default function PhotoAdd() {
   const [selectedImage, setSelectedImage] = useState<string | undefined>(
     undefined,
   );
-  const [status2, requestPermission] = ImagePicker.useMediaLibraryPermissions();
-  // status2 works for iOS mainly, but requestPermission is used by both?
-  // TODO: Rename to something better
+  const [processing, setProcessing] = useState<boolean>(false);
+  const { setGuessedItems, textToItemMatch, matchToEstimation } =
+    useGuessData();
 
-  const pickImageAsync = async () => {
-    try {
-      if (Platform.OS !== "web") {
-        // Don't need permission for web, not that this
-        // app intends to be on web
-        const { status } =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-        if (status !== "granted") {
-          const permissonResponse = await requestPermission();
-          if (permissonResponse.status !== "granted") {
-            Alert.alert(
-              "You have not given Mr. Fridge permisson to access your photo library. ",
-              "You can change this in your phone settings.",
-              [
-                {
-                  text: "Cancel",
-                },
-                {
-                  text: "Open Settings",
-                  onPress: () => {
-                    Platform.OS === "ios"
-                      ? Linking.openURL("app-settings:")
-                      : Linking.openSettings;
-                  },
-                },
-              ],
-            );
-            return; // Don't run image picker if permissions denied
-          }
-        }
-      }
-
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        // allowsEditing: true, // Lets you crop the image
-        quality: 1,
-        base64: true, // The format you want if you're sending the image to an api?
-      });
-
-      if (!result.canceled) {
-        setSelectedImage(result.assets[0].uri);
-      } else {
-        alert("No image selected");
-      }
-    } catch (error) {
-      console.log("There was an issue");
-    }
-  };
-
-  const  photoToTextPost = async () => {
+  const photoToTextPost = async () => {
+    setProcessing(true);
     if (!selectedImage) {
-        alert("No image selected.");
-        return;
-      }
-    
-      const uri = selectedImage; // e.g. "file:///.../ImagePicker/abc.jpeg"
-      const name = uri.split("/").pop() ?? "photo.jpg";
-      const ext = name.split(".").pop()?.toLowerCase();
-      const type =
-        ext === "png" ? "image/png" :
-        ext === "heic" ? "image/heic" :
-        "image/jpeg";
-    
-      const makeForm = (fieldName: string) => {
-        const form = new FormData();
-        // FastAPI commonly expects UploadFile = File(...), param name often "file"
-        form.append(fieldName, { uri, name, type } as any);
-        return form;
-      };
-
-      const postOnce = async (fieldName: string) => {
-        const res = await fetchApi("/ocr", {
-          method: "POST",
-          body: makeForm(fieldName),
-        });
-        const text = await res.text();
-        return { res, text, fieldName };
-      };
-
-      // Try the two most common multipart field names
-      let { res, text, fieldName } = await postOnce("file");
-      if (res.status === 422) {
-        ({ res, text, fieldName } = await postOnce("image"));
-      }
-
-      console.log("[ocr] upload field:", fieldName, "status:", res.status);
-      try {
-        console.log(JSON.parse(text));
-      } catch {
-        console.log(text);
-      }
-  };
-
-  const usePhoto = () => {
-    if (selectedImage) {
-        console.log(selectedImage);
-      router.push({
-        pathname: "/ProcessDisplay",
-        params: {
-          data: JSON.stringify(selectedImage),
-        },
-      });
-    } else {
       alert("No image selected.");
+      return;
+    }
+
+    const uri = selectedImage; // e.g. "file:///.../ImagePicker/abc.jpeg"
+    const name = uri.split("/").pop() ?? "photo.jpg";
+    const ext = name.split(".").pop()?.toLowerCase();
+    const type =
+      ext === "png"
+        ? "image/png"
+        : ext === "heic"
+          ? "image/heic"
+          : "image/jpeg";
+
+    const makeForm = (fieldName: string) => {
+      const form = new FormData();
+      // FastAPI commonly expects UploadFile = File(...), param name often "file"
+      form.append(fieldName, { uri, name, type } as any);
+      return form;
+    };
+
+    const postOnce = async (fieldName: string) => {
+      const res = await fetchApi("/ocr", {
+        method: "POST",
+        body: makeForm(fieldName),
+      });
+      const text = await res.text();
+      return { res, text, fieldName };
+    };
+
+    // Try the two most common multipart field names
+    let { res, text, fieldName } = await postOnce("file");
+    if (res.status === 422) {
+      ({ res, text, fieldName } = await postOnce("image"));
+    }
+    // Here is where we get the actual results? idk we need a loading indicator
+    setProcessing(false);
+
+    console.log("[ocr] upload field:", fieldName, "status:", res.status);
+    try {
+      const itemMatches = textToItemMatch(JSON.parse(text));
+      const guessedItems = matchToEstimation(itemMatches); // We get all the way to guess types which go into DisplayResults
+      setGuessedItems(guessedItems);
+      router.push({
+        pathname: "/DisplayResults",
+      });
+    } catch {
+      console.log(text);
     }
   };
 
   return (
     <View className="flex-1 relative">
       <AddHeader />
-      <View className="pt-10 flex-col items-stretch justify-between gap-4">
-        <View className="flex-col items-center">
-          <ImageViewer
-            imgSource={PlaceholderImage}
-            selectedImage={selectedImage}
-          />
-        </View>
-        <View className="flex-row justify-center gap-4">
-          <PickImageButton
-            theme="tertiary"
-            label="Cancel"
-            onPress={() => setSelectedImage(undefined)}
-          />
-          <PickImageButton
-            theme="primary"
-            label="Choose a photo"
-            onPress={pickImageAsync}
-          />
-          <PickImageButton label="Use this photo" onPress={photoToTextPost} />
-        </View>
-      </View>
+      {processing ? (
+        <Processing />
+      ) : (
+        <ImagePickerModal
+          PlaceholderImage={PlaceholderImage}
+          selectedImage={selectedImage}
+          setSelectedImage={setSelectedImage}
+          photoToTextPost={photoToTextPost}
+        />
+      )}
+
       <BackButton />
     </View>
   );
 }
-
-/*
-Return Type Example:
-iOs:
-{
-  "assets": [
-    {
-      "assetId": "99D53A1F-FEEF-40E1-8BB3-7DD55A43C8B7/L0/001",
-      "base64": null,
-      "duration": null,
-      "exif": null,
-      "fileName": "IMG_0004.JPG",
-      "fileSize": 2548364,
-      "height": 1669,
-      "mimeType": "image/jpeg",
-      "type": "image",
-      "uri": "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540anonymous%252FStickerSmash-13f21121-fc9d-4ec6-bf89-bf7d6165eb69/ImagePicker/ea574eaa-f332-44a7-85b7-99704c22b402.jpeg",
-      "width": 1668
-    }
-  ],
-  "canceled": false
-}
-
-Android:
-{
-  "assets": [
-    {
-      "assetId": null,
-      "base64": null,
-      "duration": null,
-      "exif": null,
-      "fileName": "ea574eaa-f332-44a7-85b7-99704c22b402.jpeg",
-      "fileSize": 4513577,
-      "height": 4570,
-      "mimeType": "image/jpeg",
-      "rotation": null,
-      "type": "image",
-      "uri": "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540anonymous%252FStickerSmash-13f21121-fc9d-4ec6-bf89-bf7d6165eb69/ImagePicker/ea574eaa-f332-44a7-85b7-99704c22b402.jpeg",
-      "width": 2854
-    }
-  ],
-  "canceled": false
-}
-*/

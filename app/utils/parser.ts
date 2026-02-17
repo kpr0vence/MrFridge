@@ -86,6 +86,9 @@ function determine_if_food(non_food_match: Match, food_match: Match) {
   return non_food_match.confidence < food_match.confidence;
 }
 
+// ------------------------------
+// EXPORTED FUNCTION
+// ------------------------------
 export default function process_text(reciept_line: String) {
   const { non_food_match, food_match } = find_grocery_item(reciept_line);
   if (determine_if_food(non_food_match, food_match)) {

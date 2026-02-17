@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import "../global.css";
 import { DataProvider } from "./DataContext";
+import { GuessProvider } from "./GuessContext";
 
 export default function RootLayout() {
   // Create a database to store the groceries. The location id is limited
@@ -16,34 +17,48 @@ export default function RootLayout() {
   return (
     <SQLiteProvider databaseName="test.db" onInit={createDbIfNeeded}>
       <DataProvider>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-          <Stack.Screen
-            name="itemsDisplay"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="ManualAdd"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="PhotoAdd"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="ProcessDisplay"
-            options={{
-              headerShown: false,
-            }}
-          />
-        </Stack>
+        <GuessProvider>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+            <Stack.Screen
+              name="itemsDisplay"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="ManualAdd"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="PhotoAdd"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="DisplayResults"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="SuccessfulSubmitMessage"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="FailureSubmitMessage"
+              options={{
+                headerShown: false,
+              }}
+            />
+          </Stack>
+        </GuessProvider>
       </DataProvider>
     </SQLiteProvider>
   );
