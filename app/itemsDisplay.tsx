@@ -1,8 +1,8 @@
 import { useLocalSearchParams } from "expo-router";
 import { ScrollView, View } from "react-native";
-import BackButton from "./components/BackButton";
+import BackButton from "./components/buttons/BackButton";
+import ItemsDisplayHeader from "./components/headers/ItemsDisplayHeader";
 import ItemsAccordian from "./components/ItemsAccordian";
-import ItemsDisplayHeader from "./components/ItemsDisplayHeader";
 import { useData } from "./DataContext";
 
 export default function ItemsDisplay() {
@@ -10,8 +10,6 @@ export default function ItemsDisplay() {
   const { data } = useLocalSearchParams();
   const locationCard = data ? JSON.parse(data as string) : {};
   const items = getDataFromLocation(locationCard.name);
-
-  // Not the best solution, but I'm having a difficult time sending the params, because it stringifies them to oblivion
 
   return (
     <View className="flex-1 relative">

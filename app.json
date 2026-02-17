@@ -4,7 +4,7 @@
     "slug": "MrFridge",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/mrFridgeLogo.png",
     "scheme": "mrfridge",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

@@ -7,25 +7,40 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { ItemType } from "./types";
+import {
+  calculateDaysTilExp,
+  calculateExpirationDate,
+  getItemsCloseToExpired,
+  getItemsExpired,
+  isCloseToExpired,
+  isExpired,
+} from "./utils/item.utils";
+import { ItemToAdd, ItemType } from "./utils/types";
 
 interface DataContextType {
   data: ItemType[];
   fridge: ItemType[];
   pantry: ItemType[];
   freezer: ItemType[];
+  loading: boolean; // New loading flag
   handleSubmit: (
-    name: string,
-    locationId: string,
-    daysTilExp: string,
+    items: ItemToAdd[],
+    onSuccess?: () => void,
+    onFailure?: (error: unknown) => void,
   ) => Promise<void>;
   handleUpdate: (
     id: number,
     name: string,
     locationId: number,
     daysTilExp: string,
+    onSuccess?: () => void,
+    onFailure?: (error: unknown) => void,
   ) => Promise<void>;
-  handleDelete: (id: number) => Promise<void>;
+  handleDelete: (
+    id: number,
+    onSuccess?: () => void,
+    onFailure?: (error: unknown) => void,
+  ) => Promise<void>;
   getItemById: (id: number) => Promise<ItemType | null>;
   getItemsCloseToExpired: (items: ItemType[]) => ItemType[];
   getItemsExpired: (items: ItemType[]) => ItemType[];
@@ -39,6 +54,7 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+// Helper functions in /utils/item.utils.ts
 export const DataProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -48,35 +64,24 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
   const [fridge, setFridge] = useState<ItemType[]>([]);
   const [pantry, setPantry] = useState<ItemType[]>([]);
   const [freezer, setFreezer] = useState<ItemType[]>([]);
+  const [loading, setLoading] = useState(false); // New loading state
 
+  // Load the data into state variables
   const loadData = useCallback(
     async (isMounted: () => boolean) => {
       const result = await database.getAllAsync<ItemType>(
         "SELECT * FROM items ORDER BY expiration_date;",
       );
-      if (!isMounted()) return;
-
-      const fridgeResult = await database.getAllAsync<ItemType>(
-        "SELECT * FROM items WHERE location_id = 1 ORDER BY expiration_date;",
-      );
-      if (!isMounted()) return;
-
-      const pantryResult = await database.getAllAsync<ItemType>(
-        "SELECT * FROM items WHERE location_id = 2 ORDER BY expiration_date;",
-      );
-      if (!isMounted()) return;
-
-      const freezerResult = await database.getAllAsync<ItemType>(
-        "SELECT * FROM items WHERE location_id = 3 ORDER BY expiration_date;",
-      );
-      if (!isMounted()) return;
+      // make one call to the db, then filter them to set fridge,
+      // freezer, and pantry states (more efficient than multiple DB calls)
+      if (!isMounted()) return; // If there was an error end early
 
       setData(result);
-      setFridge(fridgeResult);
-      setPantry(pantryResult);
-      setFreezer(freezerResult);
+      setFridge(result.filter((i) => i.location_id === 1));
+      setPantry(result.filter((i) => i.location_id === 2));
+      setFreezer(result.filter((i) => i.location_id === 3));
     },
-    [database],
+    [database], // Updates if the value of databse updates
   );
 
   useEffect(() => {
@@ -85,124 +90,122 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
     return () => {
       mounted = false;
     };
-  }, [loadData]);
+  }, [loadData]); // Load the mounted data if the db data chages
 
+  // Helper functions to prepare for batch insertion of items
+  // Makes the needed amount of placeholders for the eventual insert string
+  const buildPlaceholders = (count: number): string =>
+    [...Array(count)].map(() => "(?, ?, ?)").join(", ");
+
+  // Puts the items into the placeholders
+  const buildInsertValues = (items: ItemToAdd[]) =>
+    items.flatMap((item) => [
+      // Have to use flatmap so that SQLite will recognize it (has to be all one array)
+      item.name,
+      calculateExpirationDate(item.daysTilExp),
+      item.locationId,
+    ]);
+
+  // Actually submit any number of items passed in
   const handleSubmit = async (
-    name: string,
-    locationId: string,
-    daysTilExp: string,
+    items: ItemToAdd[],
+    onSuccess?: () => void,
+    onFailure?: (error: unknown) => void,
   ) => {
-    const today = new Date();
-    const dateToInsert = new Date();
-    dateToInsert.setDate(today.getDate() + parseInt(daysTilExp));
+    if (!items.length) return;
+
+    setLoading(true);
 
     try {
+      await database.execAsync("BEGIN TRANSACTION;");
+
+      const placeholders = buildPlaceholders(items.length);
+      const values = buildInsertValues(items); // ← calculateExpirationDate runs safely inside try
+
       await database.runAsync(
-        "INSERT INTO items (name, expiration_date, location_id) VALUES (?, ?, ?);",
-        [name, dateToInsert.toISOString(), locationId],
+        `INSERT INTO items (name, expiration_date, location_id) VALUES ${placeholders};`,
+        values,
       );
+
+      await database.execAsync("COMMIT;");
       await refreshData();
+      onSuccess?.();
     } catch (error) {
-      console.log(error);
+      await database.execAsync("ROLLBACK;").catch(() => {}); // ensure rollback never throws
+      onFailure?.(error);
+      // throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Update an item
   const handleUpdate = async (
     id: number,
     name: string,
     locationId: number,
     daysTilExp: string,
+    onSuccess?: () => void,
+    onFailure?: (error: unknown) => void,
   ) => {
+    setLoading(true);
+
     try {
-      const today = new Date();
-      const dateToInsert = new Date();
-      dateToInsert.setDate(today.getDate() + parseInt(daysTilExp));
+      const expirationDate = calculateExpirationDate(daysTilExp);
 
       await database.runAsync(
-        `UPDATE items SET name = ?, expiration_date = ?, location_id = ? WHERE id = ?`,
-        [name, dateToInsert.toISOString(), locationId, id],
+        `UPDATE items
+         SET name = ?, expiration_date = ?, location_id = ?
+         WHERE id = ?`,
+        [name, expirationDate, locationId, id],
       );
-      // router.back();
+
       await refreshData();
+      onSuccess?.();
     } catch (error) {
-      console.error("Error updating item: ", error);
+      onFailure?.(error);
+      // throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Delete an item
+  const handleDelete = async (
+    id: number,
+    onSuccess?: () => void,
+    onFailure?: (error: unknown) => void,
+  ) => {
+    setLoading(true);
+
+    try {
+      await database.runAsync("DELETE FROM items WHERE id = ?;", [id]);
+      await refreshData();
+      onSuccess?.();
+    } catch (error) {
+      onFailure?.(error);
+      // throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Other helpers
   const getItemById = async (id: number) => {
     const result = await database.getFirstAsync<ItemType>(
-      "SELECT name, expiration_date, location_id FROM items WHERE id = ?;",
-      [parseInt(id as unknown as string)],
+      "SELECT * FROM items WHERE id = ?;",
+      [id],
     );
 
     return result ?? null;
   };
 
-  const handleDelete = async (id: number) => {
-    try {
-      await database.runAsync("DELETE FROM items WHERE id = ?;", [id]);
-      await refreshData(); // to redraw the guys
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  // Function to help get the distance between one day and the current date
-  function calculateDaysTilExp(expiration_date: string) {
-    const laterDate = new Date(expiration_date);
-
-    const currentDate = new Date();
-
-    const diff = laterDate.getTime() - currentDate.getTime();
-    const diffDays = Math.ceil(diff / (1000 * 3600 * 24));
-
-    return diffDays;
-  }
-
-  // Public to get all of the items close to expiration (can be done with .length to get the number of them)
-  function getItemsCloseToExpired(items: ItemType[]) {
-    let to_return: ItemType[] = [];
-
-    for (let i = 0; i < items.length; i++) {
-      if (isCloseToExpired(items[i])) {
-        to_return.push(items[i]);
-      }
-    }
-    return to_return;
-  }
-
-  // Same as above but for expired
-  function getItemsExpired(items: ItemType[]) {
-    let to_return: ItemType[] = [];
-
-    for (let i = 0; i < items.length; i++) {
-      if (isExpired(items[i])) {
-        to_return.push(items[i]);
-      }
-    }
-    return to_return;
-  }
-
-  // Private function to help the getItemsExpired function
-  function isExpired(item: ItemType) {
-    return calculateDaysTilExp(item.expiration_date) < 0;
-  }
-
-  // Private function to help the getItemsCloseToExpired function
-  function isCloseToExpired(item: ItemType) {
-    const dif = calculateDaysTilExp(item.expiration_date);
-    return dif <= 5 && dif >= 0;
-  }
-
-  const getTotalItems = () => {
-    return data.length;
-  };
+  const getTotalItems = () => data.length;
 
   const getDataFromLocation = (location: string) => {
-    if (location.toLowerCase() === "fridge") return fridge;
-
-    if (location.toLowerCase() === "pantry") return pantry;
-
+    const lower = location.toLowerCase();
+    if (lower === "fridge") return fridge;
+    if (lower === "pantry") return pantry;
     return freezer;
   };
 
@@ -217,10 +220,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
         fridge,
         pantry,
         freezer,
+        loading, // expose loading
         handleSubmit,
         handleUpdate,
-        getItemById,
         handleDelete,
+        getItemById,
         getItemsCloseToExpired,
         getItemsExpired,
         getTotalItems,

@@ -3,7 +3,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import { useData } from "../DataContext";
 import ItemsExpiredBubble from "./ItemsExpiredBubble";
 import ItemsNearExpiredBubble from "./ItemsNearExpiredBubble";
-import ToItemsButton from "./ToItemsButton";
+import ToItemsButton from "./buttons/ToItemsButton";
 
 interface locationCardProps {
   location: string;
