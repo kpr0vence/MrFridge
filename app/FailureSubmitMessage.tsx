@@ -21,8 +21,8 @@ export default function SuccessfulSubmitMessage() {
     <View className="flex-1 ">
       <AddHeader />
       <View className="flex justify-center items-center w-full p-4">
-        <View className=" bg-red-600 p-4">
-          <Text className="text-xl">
+        <View className=" bg-red-600 p-4 rounded-md">
+          <Text className="text-xl text-white">
             Something went wrong. Please try again in a few minutes.
           </Text>
         </View>

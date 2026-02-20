@@ -31,7 +31,6 @@ export default function DialogueButtonGroup({
   function handleOnPress(newLocation: 1 | 2 | 3) {
     setLocation(newLocation);
     locationChange(newLocation);
-    // console.log("Location is: " + newLocation);
   }
 
   return (

@@ -23,7 +23,6 @@ export default function DisplayResults() {
   function removeItem(idToRemove: number) {
     // Do stuff
     const trimmedArr = itemsToSave.filter((item) => item.id != idToRemove);
-    console.log("Item was removed, array is: " + trimmedArr);
     setItemsToSave(trimmedArr);
   }
 
@@ -32,12 +31,6 @@ export default function DisplayResults() {
     const updatedInfoArr = itemsToSave.map((item) => {
       return item.id == idToUpdate ? newItem : item;
     });
-    console.log("Update Item: ");
-    updatedInfoArr.forEach((item) =>
-      console.log(
-        `{ ${item.guessedItem}, ${item.daysTilExp}, ${item.location}}`,
-      ),
-    );
 
     setItemsToSave(updatedInfoArr);
   }
@@ -58,6 +51,7 @@ export default function DisplayResults() {
       daysTilExp: item.daysTilExp,
     };
     setItemsToSave([...itemsToSave, newItem]);
+    setIsModalVisible(false);
   }
 
   const onFinalSubmit = async () => {
@@ -114,6 +108,16 @@ export default function DisplayResults() {
               );
             })}
           </View>
+          <View className="flex items-center justify-center">
+            <Pressable
+              onPress={() => setIsModalVisible(true)}
+              className=" w-3/4 bg-gray-200 p-4 rounded-md my-4"
+            >
+              <Text className="text-center text-lg text-gray-500">
+                Add Another Item
+              </Text>
+            </Pressable>
+          </View>
         </KeyboardAwareScrollView>
         <View id="finalSubmitButton" className=" flex-row gap-4 justify-center">
           <Pressable
@@ -134,12 +138,7 @@ export default function DisplayResults() {
           </Pressable>
         </View>
       </View>
-      <Pressable
-        onPress={() => setIsModalVisible(false)}
-        className="text-center bg-gray-500 w-full p-4 rounded-md"
-      >
-        <Text className="text-lg font-black">Add Another Item</Text>
-      </Pressable>
+
       <EditOrManualAdd
         editMode={false}
         onAdd={onNewItemSubmit}

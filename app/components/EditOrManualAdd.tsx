@@ -36,15 +36,16 @@ export default function EditOrManualAdd({
   //   const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
 
   const [name, setName] = useState<string>("");
-  const [estimation, setEstimation] = useState<number>(0);
+  const [estimation, setEstimation] = useState<string>("0");
   const [locationStatus, setLocationStatus] = useState<1 | 2 | 3>(1);
 
   useEffect(() => {
     if (originalItem && editMode) {
       setName(originalItem.name);
-      setEstimation(calculateDaysTilExp(originalItem.expiration_date));
+      setEstimation(
+        calculateDaysTilExp(originalItem.expiration_date).toString(),
+      );
       setLocationStatus(originalItem.location_id);
-      console.log("Estimated exp: " + originalItem.expiration_date);
     }
   }, [originalItem]);
 
@@ -53,10 +54,9 @@ export default function EditOrManualAdd({
   }
 
   function handleEstimationChange(text: string) {
-    const numericValue = +text;
-
-    if (!isNaN(numericValue)) {
-      setEstimation(numericValue);
+    // Allow empty string and "-"
+    if (/^-?\d*$/.test(text)) {
+      setEstimation(text);
     }
   }
 
@@ -102,7 +102,7 @@ export default function EditOrManualAdd({
               <Text className="text-gray-800 text-xl font-bold">Name</Text>
               <TextInput
                 placeholder="Name"
-                defaultValue={name}
+                value={name}
                 onChangeText={(newText) => handleNameChange(newText)}
                 className="rounded-md p-4 mt-0 bg-gray-200 text-xl text-gray-500 w-3/4"
               />
@@ -110,7 +110,7 @@ export default function EditOrManualAdd({
 
             <View className="flex-row gap-4 items-center">
               <TextInput
-                defaultValue={estimation.toString()}
+                value={estimation}
                 onChangeText={(newText) => {
                   handleEstimationChange(newText);
                 }}

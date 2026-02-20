@@ -38,13 +38,10 @@ export default function ItemCardContent({ item }: ItemCardContentProps) {
     const trimmedDays = updateItem.expiration_date.trim();
     if (trimmedDays.length > 0) {
       const parsedDays = parseInt(trimmedDays, 10);
-      console.log("Parsed Days: " + parsedDays);
       if (!isNaN(parsedDays)) result.daysUntilExpiration = parsedDays;
     }
 
     if (updateItem.location_id !== null) result.moveTo = updateItem.location_id;
-
-    console.log("Form data being submitted:", result);
 
     // Update it
     handleUpdate(

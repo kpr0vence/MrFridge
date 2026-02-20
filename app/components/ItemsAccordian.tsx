@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 import Accordion from "react-native-collapsible/Accordion";
 import { ItemType } from "../utils/types";
 import ItemCardContent from "./ItemCardContent";
@@ -11,7 +11,6 @@ interface ItemsAccordianProps {
 
 export default function ItemsAccordian({ items }: ItemsAccordianProps) {
   const [activeSections, setActiveSections] = useState([]);
-  const [sections, setSections] = useState<ItemType[]>(items);
 
   function renderHeader(section: ItemType, _: any, isActive: boolean) {
     return <ItemCardHeader item={section} isActive={isActive} />;
@@ -25,12 +24,20 @@ export default function ItemsAccordian({ items }: ItemsAccordianProps) {
     );
   }
 
+  if (items.length === 0)
+    return (
+      <View className="border-4 border-gray-200 rounded-lg  w-full p-4">
+        <Text className="text-xl text-center text-gray-400 font-bold">
+          No Items Stored Here Yet!
+        </Text>
+      </View>
+    );
   // TODO: Fix bug where the edit modal doesn't update when you mark an item
   // as eaten
   return (
     <Accordion
       align="bottom"
-      sections={sections}
+      sections={items}
       activeSections={activeSections}
       renderHeader={renderHeader}
       renderContent={renderContent}

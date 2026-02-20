@@ -21,8 +21,10 @@ export default function SuccessfulSubmitMessage() {
     <View className="flex-1 ">
       <AddHeader />
       <View className="flex justify-center items-center w-full p-4">
-        <View className=" bg-green-600 p-4">
-          <Text className="text-xl">Your items were successfully!</Text>
+        <View className=" bg-green-600 p-4 rounded-md">
+          <Text className="text-xl text-white">
+            Your items were successfully submitted!
+          </Text>
         </View>
       </View>
     </View>
