@@ -11,7 +11,7 @@ interface ItemsAccordianProps {
 
 export default function ItemsAccordian({ items }: ItemsAccordianProps) {
   const [activeSections, setActiveSections] = useState([]);
-  const sections = items;
+  const [sections, setSections] = useState<ItemType[]>(items);
 
   function renderHeader(section: ItemType, _: any, isActive: boolean) {
     return <ItemCardHeader item={section} isActive={isActive} />;
@@ -36,7 +36,6 @@ export default function ItemsAccordian({ items }: ItemsAccordianProps) {
       renderContent={renderContent}
       underlayColor={"#f9fafb"}
       onChange={(sections) => setActiveSections(sections as any)}
-      // sectionContainerStyle={styles.accordContainer}
     />
   );
 }

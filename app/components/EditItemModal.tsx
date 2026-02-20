@@ -25,7 +25,9 @@ export default function EditItemModal({
 
   // Dropdown state
   const [open, setOpen] = useState(false);
-  const [moveTo, setMoveTo] = useState<number | null>(item.location_id || null);
+  const [moveTo, setMoveTo] = useState<1 | 2 | 3 | null>(
+    item.location_id || null,
+  );
   const [items, setItems] = useState([
     { label: "Fridge", value: 1 },
     { label: "Pantry", value: 2 },

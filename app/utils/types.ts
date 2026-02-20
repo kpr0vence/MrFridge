@@ -2,7 +2,7 @@ export type ItemType = {
   id: number;
   name: string;
   expiration_date: string;
-  location_id: number;
+  location_id: 1 | 2 | 3;
 };
 
 export type ItemToAdd = {

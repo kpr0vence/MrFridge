@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import EditOrManualAdd from "./components/EditOrManualAdd";
 import AddHeader from "./components/headers/AddHeader";
 import VerifyGuessFormItem from "./components/VerifyGuessFormItem";
 import { useData } from "./DataContext";
@@ -11,6 +12,7 @@ import { GuessType, ItemToAdd } from "./utils/types";
 export default function DisplayResults() {
   const { guessedItems } = useGuessData();
   const { handleSubmit } = useData();
+  const [isModalVisable, setIsModalVisible] = useState<boolean>(false);
 
   const [itemsToSave, setItemsToSave] = useState<GuessType[]>(guessedItems);
 
@@ -46,6 +48,16 @@ export default function DisplayResults() {
       locationId: item.location,
       daysTilExp: item.daysTilExp,
     };
+  }
+
+  function onNewItemSubmit(item: ItemToAdd) {
+    const newItem: GuessType = {
+      id: itemsToSave.length,
+      guessedItem: item.name,
+      location: item.locationId,
+      daysTilExp: item.daysTilExp,
+    };
+    setItemsToSave([...itemsToSave, newItem]);
   }
 
   const onFinalSubmit = async () => {
@@ -122,6 +134,20 @@ export default function DisplayResults() {
           </Pressable>
         </View>
       </View>
+      <Pressable
+        onPress={() => setIsModalVisible(false)}
+        className="text-center bg-gray-500 w-full p-4 rounded-md"
+      >
+        <Text className="text-lg font-black">Add Another Item</Text>
+      </Pressable>
+      <EditOrManualAdd
+        editMode={false}
+        onAdd={onNewItemSubmit}
+        modalVisible={{
+          isModalVisable: isModalVisable,
+          setIsModalVisible: setIsModalVisible,
+        }}
+      />
     </View>
   );
 }
