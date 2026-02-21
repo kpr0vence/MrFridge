@@ -1,4 +1,4 @@
-import { useSQLiteContext } from "expo-sqlite";
+import { SQLiteDatabase, useSQLiteContext } from "expo-sqlite";
 import React, {
   createContext,
   ReactNode,
@@ -18,6 +18,7 @@ import {
 import { ItemToAdd, ItemType } from "./utils/types";
 
 interface DataContextType {
+  database: SQLiteDatabase;
   data: ItemType[];
   fridge: ItemType[];
   pantry: ItemType[];
@@ -216,6 +217,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
   return (
     <DataContext.Provider
       value={{
+        database,
         data,
         fridge,
         pantry,

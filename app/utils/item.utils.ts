@@ -42,7 +42,7 @@ export const isExpired = (item: ItemType): boolean => {
 // boolean indicating if an item is close to expired, but NOT expired
 export const isCloseToExpired = (item: ItemType): boolean => {
   const diff = calculateDaysTilExp(item.expiration_date);
-  return diff <= 5 && diff >= 0;
+  return diff <= 4 && diff >= 0;
 };
 
 // Return all expired items

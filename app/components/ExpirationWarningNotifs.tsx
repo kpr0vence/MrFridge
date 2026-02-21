@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Switch, Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import ExpirationWarningDetails from "./ExpirationWarningDetails";
+import TestNotifsButton from "./TestNotifsButton";
 
 export default function ExpirationWarningNotifs() {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -33,6 +34,7 @@ export default function ExpirationWarningNotifs() {
         isModalVisible={isEnabled}
         setIsModalVisible={toggleSwitch}
       />
+      <TestNotifsButton />
     </View>
   );
 }
