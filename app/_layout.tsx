@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
+import { runMigrations } from "../db/migrations";
 import "../global.css";
 import { DataProvider } from "../utils/DataContext";
 import { GuessProvider } from "../utils/GuessContext";
@@ -22,15 +23,9 @@ Notifications.setNotificationHandler({
 });
 
 // Create the DB table and define the background task
-const createDbIfNeeded = async (db: SQLiteDatabase) => {
-  await db.execAsync(
-    `CREATE TABLE IF NOT EXISTS items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      expiration_date TEXT,
-      location_id INTEGER CHECK (location_id IN (1, 2, 3))
-    );`,
-  );
+ const createDbIfNeeded = async (db: SQLiteDatabase) => {
+    await runMigrations(db);
+  };
 
   // Register daily task for actual app (not expo go)
   const registerDailyTask = async () => {
