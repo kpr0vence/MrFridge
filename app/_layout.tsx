@@ -1,5 +1,4 @@
 import { Stack } from "expo-router";
-// import 'react-native-reanimated';
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import "../global.css";
 import { DataProvider } from "./DataContext";
@@ -15,19 +14,26 @@ import {
   GROCERY_TASK,
 } from "./utils/backgroundTasks";
 
-// Create a database to store the groceries. The location id is limited
-// to 1 (fridge) 2 (pantry) or 3 (freezer)
+// Create the DB table and define the background task
 const createDbIfNeeded = async (db: SQLiteDatabase) => {
   await db.execAsync(
-    " CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, expiration_date TEXT, location_id INTEGER CHECK (location_id IN (1, 2, 3)));",
+    `CREATE TABLE IF NOT EXISTS items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      expiration_date TEXT,
+      location_id INTEGER CHECK (location_id IN (1, 2, 3))
+    );`,
   );
+
+  // Define the background task
   defineGroceryBackgroundTask(db);
 
+  // Register daily task for production/dev builds
   const registerDailyTask = async () => {
     const isRegistered = await TaskManager.isTaskRegisteredAsync(GROCERY_TASK);
     if (!isRegistered) {
       await BackgroundTask.registerTaskAsync(GROCERY_TASK, {
-        minimumInterval: 24 * 60 * 60, // once per day
+        minimumInterval: 24 * 60 * 60, // run once per day
       });
       console.log("Grocery background task registered.");
     }
@@ -35,18 +41,7 @@ const createDbIfNeeded = async (db: SQLiteDatabase) => {
   registerDailyTask().catch(console.error);
 };
 
-// // Make the notification task go daily
-// const registerDailyTask = async () => {
-//   const hasTask = await TaskManager.isTaskRegisteredAsync(GROCERY_TASK);
-//   if (!hasTask) {
-//     await BackgroundTask.registerTaskAsync(GROCERY_TASK, {
-//       minimumInterval: 24 * 60 * 60, // run once per day
-//     });
-//     console.log("Grocery background task registered.");
-//   }
-// };
-
-// Get notification permisions
+// Request notification permissions
 const requestNotificationPermissions = async () => {
   const { status } = await Notifications.getPermissionsAsync();
   if (status !== "granted") {
@@ -57,7 +52,6 @@ const requestNotificationPermissions = async () => {
 export default function RootLayout() {
   useEffect(() => {
     requestNotificationPermissions().catch(console.error);
-    // registerDailyTask().catch(console.error); // only minimumInterval option
   }, []);
 
   return (
@@ -69,39 +63,21 @@ export default function RootLayout() {
             <Stack.Screen name="+not-found" />
             <Stack.Screen
               name="itemsDisplay"
-              options={{
-                headerShown: false,
-              }}
+              options={{ headerShown: false }}
             />
-            <Stack.Screen
-              name="ManualAdd"
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="PhotoAdd"
-              options={{
-                headerShown: false,
-              }}
-            />
+            <Stack.Screen name="ManualAdd" options={{ headerShown: false }} />
+            <Stack.Screen name="PhotoAdd" options={{ headerShown: false }} />
             <Stack.Screen
               name="DisplayResults"
-              options={{
-                headerShown: false,
-              }}
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="SuccessfulSubmitMessage"
-              options={{
-                headerShown: false,
-              }}
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="FailureSubmitMessage"
-              options={{
-                headerShown: false,
-              }}
+              options={{ headerShown: false }}
             />
           </Stack>
         </GuessProvider>

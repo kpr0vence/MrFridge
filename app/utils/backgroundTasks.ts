@@ -1,6 +1,5 @@
-// backgroundTasks.ts
 import * as Notifications from "expo-notifications";
-import { SQLiteDatabase } from "expo-sqlite";
+import { SQLiteDatabase, openDatabaseSync } from "expo-sqlite";
 import * as TaskManager from "expo-task-manager";
 import { BackgroundTaskResult, ItemType } from "./types";
 
@@ -10,38 +9,41 @@ interface ExecResult {
   rows: { _array: ItemType[] };
 }
 
-// fetch items using execAsync
+// Open a standalone DB (for background tasks in production builds)
+const openDb = (): SQLiteDatabase => openDatabaseSync("test.db");
+
+// Fetch items expiring in <=4 days
 export const fetchExpiringItems = async (
   db: SQLiteDatabase,
 ): Promise<ItemType[]> => {
   const sql = `
     SELECT *,
-      CAST(julianday(expiration_date) - julianday('now') AS INTEGER) AS daysRemaining
+      julianday(expiration_date) - julianday('now') AS daysRemaining
     FROM items
-    WHERE julianday(expiration_date) - julianday('now') <= 4
     ORDER BY expiration_date;
   `;
 
   try {
-    const result = (await db.execAsync(sql)) as unknown as ExecResult;
+    const results = (await db.execAsync(sql)) as unknown as {
+      rows: { _array: ItemType[] };
+    }[];
 
-    // safely access _array
-    if (!result?.rows?._array) return [];
+    if (!results?.length || !results[0]?.rows?._array) return [];
 
-    return result.rows._array.map((row: any) => ({
-      ...row,
-      daysRemaining: row.daysRemaining,
-    })) as ItemType[];
+    return results[0].rows._array
+      .map((row: any) => ({
+        ...row,
+        daysRemaining: Math.round(row.daysRemaining), // round to nearest int
+      }))
+      .filter((row) => row.daysRemaining <= 4); // <= 4 days, includes negative (expired)
   } catch (err) {
     console.error("SQL error in fetchExpiringItems:", err);
     return [];
   }
 };
-
-// send notification
+// Send notification about expiring items
 export const sendExpiringItemsNotification = async (db: SQLiteDatabase) => {
   const expiringItems = await fetchExpiringItems(db);
-
   if (!expiringItems.length) return;
 
   let message: string;
@@ -61,11 +63,13 @@ export const sendExpiringItemsNotification = async (db: SQLiteDatabase) => {
   });
 };
 
-// define background task
-export const defineGroceryBackgroundTask = (db: SQLiteDatabase) => {
+// Define background task (used in _layout)
+export const defineGroceryBackgroundTask = (db?: SQLiteDatabase) => {
   TaskManager.defineTask(GROCERY_TASK, async () => {
     try {
-      await sendExpiringItemsNotification(db);
+      // If no DB passed, open a standalone one
+      const taskDb = db ?? openDb();
+      await sendExpiringItemsNotification(taskDb);
       return BackgroundTaskResult.NewData;
     } catch (err) {
       console.error("Background task error:", err);

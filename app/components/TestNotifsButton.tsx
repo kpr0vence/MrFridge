@@ -1,19 +1,29 @@
 import * as Notifications from "expo-notifications";
+import { SQLiteDatabase } from "expo-sqlite";
 import React from "react";
 import { Button, View } from "react-native";
 import { useData } from "../DataContext";
 import { fetchExpiringItems } from "../utils/backgroundTasks";
-import { getItemsCloseToExpired } from "../utils/item.utils";
-import { SQLiteDatabaseWithTransaction } from "../utils/types";
 
 export default function TestNotifsButton() {
   const { database } = useData();
+
   const runDevNotification = async () => {
     try {
-      const allItems = await fetchExpiringItems(
-        database as SQLiteDatabaseWithTransaction,
-      );
-      const itemsToNotify = getItemsCloseToExpired(allItems);
+      // 🔹 Debug: log all rows in the items table
+      const allRows = await database.getAllAsync("SELECT * FROM items;");
+      console.log("All items in DB:", allRows);
+
+      if (!database) {
+        console.log("DB not ready yet!");
+        return;
+      }
+
+      // Use provider DB for dev testing
+      const allItems = await fetchExpiringItems(database as SQLiteDatabase);
+      console.log("All Items: ", allItems);
+      // const itemsToNotify = getItemsCloseToExpired(allItems);
+      const itemsToNotify = allItems;
 
       if (itemsToNotify.length === 0) {
         console.log("No items near expiration!");
@@ -25,12 +35,12 @@ export default function TestNotifsButton() {
         message = itemsToNotify.map((i) => i.name).join(", ");
       } else {
         const closest = itemsToNotify[0];
-        message = `${closest.name} expires soon, plus ${itemsToNotify.length - 1} other items`;
+        message = `${closest.name} and ${itemsToNotify.length - 1} other items are expiring soon`;
       }
 
       await Notifications.scheduleNotificationAsync({
-        content: { title: "Grocery Alert 🛒 (Dev Test)", body: message },
-        trigger: null, // shows immediately
+        content: { title: "Mr. Fridge (Dev Test)", body: message },
+        trigger: null,
       });
 
       console.log("Dev notification sent!");
