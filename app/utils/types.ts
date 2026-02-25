@@ -1,3 +1,5 @@
+import { SQLiteDatabase } from "expo-sqlite";
+
 export type ItemType = {
   id: number;
   name: string;
@@ -25,3 +27,43 @@ export type MatchItem = {
 };
 
 export type LocationType = "fridge" | "freezer" | "pantry";
+
+// --- TypeScript typings for SQLite ---
+
+export type SQLResultSet = {
+  insertId: number;
+  rowsAffected: number;
+  rows: {
+    _array: any[];
+    length: number;
+    item: (i: number) => any;
+  };
+};
+
+export type SQLError = {
+  code: number;
+  message: string;
+};
+
+export enum BackgroundTaskResult {
+  NoData = 0,
+  NewData = 1,
+  Failed = 2,
+}
+
+export interface SQLTransaction {
+  executeSql(
+    sqlStatement: string,
+    args?: (string | number | null)[],
+    success?: (tx: SQLTransaction, resultSet: any) => void,
+    error?: (tx: SQLTransaction, error: any) => boolean,
+  ): void;
+}
+
+export interface SQLiteDatabaseWithTransaction extends SQLiteDatabase {
+  transaction(
+    callback: (tx: SQLTransaction) => void,
+    error?: (err: any) => void,
+    success?: () => void,
+  ): void;
+}
