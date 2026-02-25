@@ -9,10 +9,17 @@ import * as Notifications from "expo-notifications";
 import * as TaskManager from "expo-task-manager";
 
 import { useEffect } from "react";
-import {
-  defineGroceryBackgroundTask,
-  GROCERY_TASK,
-} from "./utils/backgroundTasks";
+import { GROCERY_TASK } from "./utils/backgroundTasks";
+
+// Ensure notifications are shown even when the app is in the foreground
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 // Create the DB table and define the background task
 const createDbIfNeeded = async (db: SQLiteDatabase) => {
@@ -25,15 +32,21 @@ const createDbIfNeeded = async (db: SQLiteDatabase) => {
     );`,
   );
 
-  // Define the background task
-  defineGroceryBackgroundTask(db);
-
-  // Register daily task for production/dev builds
+  // Register daily task for actual app (not expo go)
   const registerDailyTask = async () => {
+    const status = await BackgroundTask.getStatusAsync();
+    if (status !== BackgroundTask.BackgroundTaskStatus.Available) { // Prevents errors while still on Expo Go
+      console.log(
+        "Background tasks are restricted/unavailable in this environment. Skipping registration.",
+      );
+      return;
+    }
+
+    // Register task if not already registered
     const isRegistered = await TaskManager.isTaskRegisteredAsync(GROCERY_TASK);
     if (!isRegistered) {
       await BackgroundTask.registerTaskAsync(GROCERY_TASK, {
-        minimumInterval: 24 * 60 * 60, // run once per day
+        minimumInterval: 24 * 60, // run ~ once per day, the interval is in minutes
       });
       console.log("Grocery background task registered.");
     }
@@ -43,10 +56,13 @@ const createDbIfNeeded = async (db: SQLiteDatabase) => {
 
 // Request notification permissions
 const requestNotificationPermissions = async () => {
-  const { status } = await Notifications.getPermissionsAsync();
-  if (status !== "granted") {
-    await Notifications.requestPermissionsAsync();
+  const settings = await Notifications.getPermissionsAsync();
+
+  if (settings.status === "granted") {
+    return;
   }
+
+  const requestResult = await Notifications.requestPermissionsAsync();
 };
 
 export default function RootLayout() {

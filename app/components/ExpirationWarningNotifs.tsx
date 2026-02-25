@@ -2,11 +2,14 @@ import { useState } from "react";
 import { Switch, Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import ExpirationWarningDetails from "./ExpirationWarningDetails";
-import TestNotifsButton from "./TestNotifsButton";
+import TestExpoGoNotifsButton from "./TestExpoGoNotifsButton";
+import TestProdBuildNotifsButton from "./TestProdBuildNotifsButton";
 
 export default function ExpirationWarningNotifs() {
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+
+  
 
   return (
     <View className="p-4">
@@ -34,7 +37,9 @@ export default function ExpirationWarningNotifs() {
         isModalVisible={isEnabled}
         setIsModalVisible={toggleSwitch}
       />
-      <TestNotifsButton />
+      {/* Dev environment testing buttons */}
+      <TestExpoGoNotifsButton />
+      <TestProdBuildNotifsButton />
     </View>
   );
 }
