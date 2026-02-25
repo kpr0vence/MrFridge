@@ -5,7 +5,7 @@ Mr. Fridge’s is a grocery tracking app whose primary purpose is to issue notif
 - **Database design**: Items are stored in a single SQLite items table with id, name, ISO expiration_date, and a location_id enum (1 fridge, 2 pantry, 3 freezer), created and accessed via the shared SQLiteProvider instance.
 - **Data context**: DataContext wraps the app, loading all rows once from SQLite into React state, deriving per‑location lists and exposing CRUD + helper methods (expiration calculations, filters, counts) to the rest of the UI.
 - **Add form**:
-  - OCR step: The OCR flow takes a selected image, extracts text, and passes those lines into a parser that tries to recognize grocery items.
+  - OCR step: The OCR flow starts from PhotoAdd, where the user picks an image, the app uploads it to a backend /ocr endpoint and gets back the parsed lines.
   - Add form, item guesswork: The parser (parser.ts) runs fuzzy matching against known grocery/non‑food lists using Fuse.js to decide if each line is food and, if so, which item name to propose, producing initial GuessType items.
   - Add form, validation form step: `DisplayResults` renders a list of `VerifyGuessFormItem` components where the user can edit each guessed name, location, and days‑until‑expiration (or delete/add items), and on final submit maps the confirmed guesses into ItemToAdd objects and calls handleSubmit to add them to the db table.
 - **Displaying items**: Screens that show groceries read from DataContext’s derived arrays (fridge, pantry, freezer, etc.), which are always kept in sync with SQLite so the UI reflects the current DB state.
