@@ -14,8 +14,8 @@ import {
   getItemsExpired,
   isCloseToExpired,
   isExpired,
-} from "./utils/item.utils";
-import { ItemToAdd, ItemType } from "./utils/types";
+} from "./item.utils";
+import { ItemToAdd, ItemType } from "./types";
 
 interface DataContextType {
   database: SQLiteDatabase;

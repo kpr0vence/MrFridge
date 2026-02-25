@@ -5,9 +5,9 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import EditOrManualAdd from "./components/EditOrManualAdd";
 import AddHeader from "./components/headers/AddHeader";
 import VerifyGuessFormItem from "./components/VerifyGuessFormItem";
-import { useData } from "./DataContext";
-import { useGuessData } from "./GuessContext";
-import { GuessType, ItemToAdd } from "./utils/types";
+import { useData } from "../utils/DataContext";
+import { useGuessData } from "../utils/GuessContext";
+import { GuessType, ItemToAdd } from "../utils/types";
 
 export default function DisplayResults() {
   const { guessedItems } = useGuessData();

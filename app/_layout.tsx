@@ -1,15 +1,15 @@
 import { Stack } from "expo-router";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import "../global.css";
-import { DataProvider } from "./DataContext";
-import { GuessProvider } from "./GuessContext";
+import { DataProvider } from "../utils/DataContext";
+import { GuessProvider } from "../utils/GuessContext";
 
 import * as BackgroundTask from "expo-background-task";
 import * as Notifications from "expo-notifications";
 import * as TaskManager from "expo-task-manager";
 
 import { useEffect } from "react";
-import { GROCERY_TASK } from "./utils/backgroundTasks";
+import { GROCERY_TASK } from "../utils/backgroundTasks";
 
 // Ensure notifications are shown even when the app is in the foreground
 Notifications.setNotificationHandler({
@@ -81,7 +81,6 @@ export default function RootLayout() {
               name="itemsDisplay"
               options={{ headerShown: false }}
             />
-            <Stack.Screen name="ManualAdd" options={{ headerShown: false }} />
             <Stack.Screen name="PhotoAdd" options={{ headerShown: false }} />
             <Stack.Screen
               name="DisplayResults"

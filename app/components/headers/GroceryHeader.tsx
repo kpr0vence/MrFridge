@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import { useData } from "../../DataContext";
+import { useData } from "../../../utils/DataContext";
 
 export default function GroceryHeader() {
   const { data, getTotalItems, getItemsCloseToExpired } = useData();

@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { useData } from "../DataContext";
+import { useData } from "../../utils/DataContext";
 import ItemsExpiredBubble from "./ItemsExpiredBubble";
 import ItemsNearExpiredBubble from "./ItemsNearExpiredBubble";
 import ToItemsButton from "./buttons/ToItemsButton";
