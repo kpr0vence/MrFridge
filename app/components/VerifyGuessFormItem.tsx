@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { GuessType } from "../../utils/types";
 import DialogueButtonGroup from "./buttons/DialogueButtonGroup";
 
