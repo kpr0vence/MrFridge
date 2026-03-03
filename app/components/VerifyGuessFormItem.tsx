@@ -1,8 +1,9 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useState } from "react";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { GuessType } from "../../utils/types";
+import { Estimation, GuessType } from "../../utils/types";
+import { useFoodData } from "../FoodContext";
 import DialogueButtonGroup from "./buttons/DialogueButtonGroup";
 
 interface Props {
@@ -16,6 +17,7 @@ export default function VerifyGuessFormItem({
   updateItem,
   removeItem,
 }: Props) {
+  const { estimateItemAtLocation } = useFoodData();
   const [isVisible, setIsVisible] = useState(true);
 
   const [name, setName] = useState<string>(item.guessedItem);
@@ -37,6 +39,15 @@ export default function VerifyGuessFormItem({
     });
   }
 
+  async function handleNameEditEnd() {
+    // try to get an estimation based on the name, update it if we get one?
+    const newEstimation: Estimation = await estimateItemAtLocation(
+      name.toLocaleLowerCase(),
+      locationStatus,
+    );
+    if (newEstimation.matchFound) setEstimation(newEstimation.estimation);
+  }
+
   function handleEstimationChange(text: string) {
     const numericValue = +text;
 
@@ -52,14 +63,22 @@ export default function VerifyGuessFormItem({
     }
   }
 
-  function handleLocationChange(newLocation: 1 | 2 | 3) {
+  async function handleLocationChange(newLocation: 1 | 2 | 3) {
     setLocationStatus(newLocation);
+    const newEstimation: Estimation = await estimateItemAtLocation(
+      name.toLowerCase(),
+      newLocation,
+    );
+
+    if (newEstimation.matchFound) setEstimation(newEstimation.estimation);
 
     updateItem(item.id, {
       ...item,
       guessedItem: name,
       location: newLocation,
-      daysTilExp: estimation.toString(),
+      daysTilExp: newEstimation.matchFound
+        ? newEstimation.estimation.toString()
+        : estimation.toString(),
     });
   }
 
@@ -94,6 +113,7 @@ export default function VerifyGuessFormItem({
             <TextInput
               value={name}
               onChangeText={handleNameChange}
+              onEndEditing={handleNameEditEnd}
               className="text-lg font-bold text-center"
             />
           </View>

@@ -224,12 +224,6 @@ export const NUTS_PASTA: FoodInfo[] = [
     days_freezer: 547,
   },
   {
-    name: "farina",
-    days_fridge: null,
-    days_pantry: 365,
-    days_freezer: null,
-  },
-  {
     name: "lentil soup",
     days_fridge: null,
     days_pantry: 1460,

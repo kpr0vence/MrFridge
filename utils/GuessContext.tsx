@@ -1,19 +1,19 @@
 import {
   createContext,
+  Dispatch,
   ReactNode,
+  SetStateAction,
   useContext,
   useState,
-  Dispatch,
-  SetStateAction,
 } from "react";
-import process_text from "./parser";
+import { useFoodData } from "../app/FoodContext";
 import { GuessType, MatchItem } from "./types";
 
 interface GuessContextType {
   guessedItems: GuessType[];
   setGuessedItems: Dispatch<SetStateAction<GuessType[]>>;
   textToItemMatch: (textObj: any) => MatchItem[];
-  matchToEstimation: (matches: MatchItem[]) => GuessType[];
+  matchToEstimation: (matches: MatchItem[]) => Promise<GuessType[]>;
 }
 
 const GuessContext = createContext<GuessContextType | undefined>(undefined);
@@ -21,13 +21,14 @@ export const GuessProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [guessedItems, setGuessedItems] = useState<GuessType[]>([]);
+  const { parseName, estimateItem } = useFoodData();
 
   // get the lines and then call /parser.ts parse_text() function per line, storing the results
   function textToItemMatch(textObj: any): MatchItem[] {
     const lines = textObj.lines;
     const itemNames: MatchItem[] = lines
       .map((line: string) => {
-        return process_text(line);
+        return parseName(line);
       })
       .filter((item: MatchItem) => item.isFood);
 
@@ -35,16 +36,20 @@ export const GuessProvider: React.FC<{ children: ReactNode }> = ({
   }
 
   // Take the items and make the estimates. This is where we'd interact with the db and choose location
-  function matchToEstimation(matches: MatchItem[]): GuessType[] {
-    const estimates: GuessType[] = matches.map((item: MatchItem, index) => {
-      const locationChoice = 1;
-      return {
-        id: index,
-        guessedItem: item.match,
-        location: locationChoice, // Just default to fridge for now
-        daysTilExp: getEstimation(item.match, locationChoice).toString(),
-      };
-    });
+  async function matchToEstimation(matches: MatchItem[]): Promise<GuessType[]> {
+    // The process should be matching it to something, then picking guessed location
+    const estimates = await Promise.all(
+      matches.map(async (item: MatchItem, index) => {
+        const { locationId, estimation } = await estimateItem(item.match);
+
+        return {
+          id: index,
+          guessedItem: item.match,
+          location: locationId, // Just default to fridge for now
+          daysTilExp: estimation.toString(),
+        };
+      }),
+    );
 
     return estimates;
   }

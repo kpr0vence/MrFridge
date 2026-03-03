@@ -21,7 +21,6 @@ export default function DisplayResults() {
   }, [guessedItems]);
 
   function removeItem(idToRemove: number) {
-    // Do stuff
     const trimmedArr = itemsToSave.filter((item) => item.id != idToRemove);
     setItemsToSave(trimmedArr);
   }

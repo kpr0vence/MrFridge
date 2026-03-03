@@ -123,12 +123,21 @@ export default function PhotoAdd() {
     console.log("[ocr] upload field:", fieldName, "status:", res.status);
     try {
       const itemMatches = textToItemMatch(JSON.parse(text));
-      const guessedItems = matchToEstimation(itemMatches); // We get all the way to guess types which go into DisplayResults
-      setGuessedItems(guessedItems);
+      const guessedItems = await matchToEstimation(itemMatches); // We get all the way to guess types which go into DisplayResults
+      console.log("Success, navigating on");
+      setGuessedItems(
+        guessedItems.filter(
+          (item) =>
+            item.guessedItem &&
+            item.guessedItem.trim() !== "" &&
+            item.guessedItem !== "undefined",
+        ),
+      );
       router.push({
         pathname: "/DisplayResults",
       });
     } catch {
+      console.log("AN error occurred");
       console.log(text);
     }
   };

@@ -102,7 +102,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
   const buildInsertValues = (items: ItemToAdd[]) =>
     items.flatMap((item) => [
       // Have to use flatmap so that SQLite will recognize it (has to be all one array)
-      item.name,
+      item.name.toLowerCase(),
       calculateExpirationDate(item.daysTilExp),
       item.locationId,
     ]);
