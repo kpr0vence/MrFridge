@@ -1,4 +1,3 @@
-
 export type ItemType = {
   id: number;
   name: string;
@@ -58,3 +57,31 @@ export interface SQLTransaction {
     error?: (tx: SQLTransaction, error: any) => boolean,
   ): void;
 }
+
+export type FoodInfo = {
+  name: string;
+  days_fridge: number | null;
+  days_pantry: number | null;
+  days_freezer: number | null;
+};
+
+export type ProcessedText = {
+  isFood: boolean;
+  match: string;
+  confidence: number;
+};
+
+export type FoodContextInfo = {
+  id: number;
+  name: string;
+  name_no_vowels: string;
+  days_fridge: number | null;
+  days_pantry: number | null;
+  days_freezer: number | null;
+};
+
+export type Estimation = {
+  locationId: 1 | 2 | 3;
+  estimation: number;
+  matchFound: boolean;
+};

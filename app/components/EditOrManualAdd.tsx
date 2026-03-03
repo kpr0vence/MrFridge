@@ -8,8 +8,9 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { useFoodData } from "../../utils/FoodContext";
 import { calculateDaysTilExp } from "../../utils/item.utils";
-import { ItemToAdd, ItemType } from "../../utils/types";
+import { Estimation, ItemToAdd, ItemType } from "../../utils/types";
 import DialogueButtonGroup from "./buttons/DialogueButtonGroup";
 
 interface props {
@@ -34,7 +35,7 @@ export default function EditOrManualAdd({
   onUpdate,
 }: props) {
   //   const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
-
+  const { estimateItemAtLocation } = useFoodData();
   const [name, setName] = useState<string>("");
   const [estimation, setEstimation] = useState<string>("0");
   const [locationStatus, setLocationStatus] = useState<1 | 2 | 3>(1);
@@ -53,6 +54,15 @@ export default function EditOrManualAdd({
     setName(text);
   }
 
+  async function handleNameEditEnd() {
+    // try to get an estimation based on the name, update it if we get one?
+    const estimation: Estimation = await estimateItemAtLocation(
+      name.toLocaleLowerCase(),
+      locationStatus,
+    );
+    if (estimation.matchFound) setEstimation(estimation.estimation.toString());
+  }
+
   function handleEstimationChange(text: string) {
     // Allow empty string and "-"
     if (/^-?\d*$/.test(text)) {
@@ -60,8 +70,13 @@ export default function EditOrManualAdd({
     }
   }
 
-  function handleLocationChange(newLocation: 1 | 2 | 3) {
+  async function handleLocationChange(newLocation: 1 | 2 | 3) {
     setLocationStatus(newLocation);
+    const estimation: Estimation = await estimateItemAtLocation(
+      name.toLowerCase(),
+      newLocation,
+    );
+    if (estimation.matchFound) setEstimation(estimation.estimation.toString());
   }
 
   function handleSubmit() {
@@ -104,6 +119,7 @@ export default function EditOrManualAdd({
                 placeholder="Name"
                 value={name}
                 onChangeText={(newText) => handleNameChange(newText)}
+                onEndEditing={handleNameEditEnd}
                 className="rounded-md p-4 mt-0 bg-gray-200 text-xl text-gray-500 w-3/4"
               />
             </View>
