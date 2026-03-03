@@ -6,7 +6,7 @@ import {
   useContext,
   useState,
 } from "react";
-import { useFoodData } from "../app/FoodContext";
+import { useFoodData } from "./FoodContext";
 import { GuessType, MatchItem } from "./types";
 
 interface GuessContextType {
@@ -26,6 +26,7 @@ export const GuessProvider: React.FC<{ children: ReactNode }> = ({
   // get the lines and then call /parser.ts parse_text() function per line, storing the results
   function textToItemMatch(textObj: any): MatchItem[] {
     const lines = textObj.lines;
+    console.log("Number of lines: " + lines.length());
     const itemNames: MatchItem[] = lines
       .map((line: string) => {
         return parseName(line);
@@ -52,13 +53,6 @@ export const GuessProvider: React.FC<{ children: ReactNode }> = ({
     );
 
     return estimates;
-  }
-
-  function getEstimation(itemName: String, locationChoice: 1 | 2 | 3): number {
-    // Here you would try to select a specific item name from the db
-    // If found, select based on location and done
-    // if not found do some basic estimation logic
-    return 5;
   }
 
   return (

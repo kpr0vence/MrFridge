@@ -8,9 +8,9 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { useFoodData } from "../../utils/FoodContext";
 import { calculateDaysTilExp } from "../../utils/item.utils";
 import { Estimation, ItemToAdd, ItemType } from "../../utils/types";
-import { useFoodData } from "../FoodContext";
 import DialogueButtonGroup from "./buttons/DialogueButtonGroup";
 
 interface props {

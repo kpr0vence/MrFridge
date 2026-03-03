@@ -7,8 +7,8 @@ import {
   useEffect,
   useState,
 } from "react";
-import process_text from "./utils/parser";
-import { Estimation, FoodContextInfo, ProcessedText } from "./utils/types";
+import process_text from "./parser";
+import { Estimation, FoodContextInfo, ProcessedText } from "./types";
 
 // task: provide all functionality for interacting with the food_info table
 // id, name, name_no_vowels, days_fridge, days_pantry, days_freezer\
@@ -62,7 +62,7 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({
   // Takes over the task of calling parser.py to allow it to pass in the new info
   function parseName(line: String) {
     const guess = process_text(line, names, namesNoVowels);
-    // console.log(`The guessed item for "${line}": ${guess.match}`);
+    console.log(`The guessed item for "${line}": ${guess.match}`);
     return guess;
   }
 

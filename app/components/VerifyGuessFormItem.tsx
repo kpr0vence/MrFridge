@@ -2,8 +2,8 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useState } from "react";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
+import { useFoodData } from "../../utils/FoodContext";
 import { Estimation, GuessType } from "../../utils/types";
-import { useFoodData } from "../FoodContext";
 import DialogueButtonGroup from "./buttons/DialogueButtonGroup";
 
 interface Props {
