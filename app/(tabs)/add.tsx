@@ -2,8 +2,8 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
 import EditOrManualAdd from "../components/EditOrManualAdd";
-import { useData } from "../DataContext";
-import { ItemToAdd, ItemType } from "../utils/types";
+import { useData } from "../../utils/DataContext";
+import { ItemToAdd, ItemType } from "../../utils/types";
 
 export default function Add() {
   const { handleSubmit, handleUpdate } = useData();

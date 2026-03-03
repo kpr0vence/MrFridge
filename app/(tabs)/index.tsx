@@ -16,7 +16,7 @@ export default function Index() {
       name: "Freezer",
       iconName: "snowflake",
     },
-  ];
+  ] as const;
 
   return (
     <View className="bg-gray-50 h-screen p-5 pt-10 flex-col gap-5">

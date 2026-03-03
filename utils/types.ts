@@ -1,4 +1,3 @@
-import { SQLiteDatabase } from "expo-sqlite";
 
 export type ItemType = {
   id: number;
@@ -57,13 +56,5 @@ export interface SQLTransaction {
     args?: (string | number | null)[],
     success?: (tx: SQLTransaction, resultSet: any) => void,
     error?: (tx: SQLTransaction, error: any) => boolean,
-  ): void;
-}
-
-export interface SQLiteDatabaseWithTransaction extends SQLiteDatabase {
-  transaction(
-    callback: (tx: SQLTransaction) => void,
-    error?: (err: any) => void,
-    success?: () => void,
   ): void;
 }

@@ -6,9 +6,6 @@ import { BackgroundTaskResult, ItemType } from "./types";
 
 export const GROCERY_TASK = "CHECK_EXPIRING_GROCERIES";
 
-interface ExecResult {
-  rows: { _array: ItemType[] };
-}
 
 // Open a standalone DB (for background tasks in production builds)
 const openDb = (): SQLiteDatabase => openDatabaseSync("test.db");

@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction } from "react";
 import { Pressable, View } from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 interface props {
   location: 1 | 2 | 3;

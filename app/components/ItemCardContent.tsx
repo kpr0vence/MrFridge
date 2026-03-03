@@ -1,9 +1,9 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import { useData } from "../DataContext";
-import { calculateDaysTilExp } from "../utils/item.utils";
-import { ItemType } from "../utils/types";
+import { useData } from "../../utils/DataContext";
+import { calculateDaysTilExp } from "../../utils/item.utils";
+import { ItemType } from "../../utils/types";
 import EditOrManualAdd from "./EditOrManualAdd";
 
 interface ItemCardContentProps {

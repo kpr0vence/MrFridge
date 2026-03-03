@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, View } from "react-native";
-import { useData } from "../DataContext";
-import { sendExpiringItemsNotification } from "../utils/backgroundTasks";
+import { useData } from "../../utils/DataContext";
+import { sendExpiringItemsNotification } from "../../utils/backgroundTasks";
 
 export default function TestExpoGoNotifsButton() {
   const { database } = useData();

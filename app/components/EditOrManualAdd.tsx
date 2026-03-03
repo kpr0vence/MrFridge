@@ -8,8 +8,8 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { calculateDaysTilExp } from "../utils/item.utils";
-import { ItemToAdd, ItemType } from "../utils/types";
+import { calculateDaysTilExp } from "../../utils/item.utils";
+import { ItemToAdd, ItemType } from "../../utils/types";
 import DialogueButtonGroup from "./buttons/DialogueButtonGroup";
 
 interface props {

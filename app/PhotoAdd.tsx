@@ -6,7 +6,7 @@ import BackButton from "./components/buttons/BackButton";
 import AddHeader from "./components/headers/AddHeader";
 import ImagePickerModal from "./components/ImagePickerModal";
 import Processing from "./components/Processing";
-import { useGuessData } from "./GuessContext";
+import { useGuessData } from "../utils/GuessContext";
 
 // -------------------------------------
 // Helper Functions

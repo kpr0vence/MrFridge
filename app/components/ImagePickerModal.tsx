@@ -1,4 +1,5 @@
 import * as ImagePicker from "expo-image-picker";
+import type { SetStateAction } from "react";
 import { Alert, Linking, Platform, View } from "react-native";
 import PickImageButton from "./buttons/PickImageButton";
 import ImageViewer from "./ImageViewer";
@@ -6,7 +7,7 @@ import ImageViewer from "./ImageViewer";
 interface imagePickerProps {
   PlaceholderImage: any;
   selectedImage: string | undefined;
-  setSelectedImage: (value: React.SetStateAction<string | undefined>) => void;
+  setSelectedImage: (value: SetStateAction<string | undefined>) => void;
   photoToTextPost: () => Promise<void>;
 }
 

@@ -3,7 +3,7 @@ import { ScrollView, View } from "react-native";
 import BackButton from "./components/buttons/BackButton";
 import ItemsDisplayHeader from "./components/headers/ItemsDisplayHeader";
 import ItemsAccordian from "./components/ItemsAccordian";
-import { useData } from "./DataContext";
+import { useData } from "../utils/DataContext";
 
 export default function ItemsDisplay() {
   const { getDataFromLocation } = useData();

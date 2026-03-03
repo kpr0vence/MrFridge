@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Text, View } from "react-native";
 import Accordion from "react-native-collapsible/Accordion";
-import { ItemType } from "../utils/types";
+import { ItemType } from "../../utils/types";
 import ItemCardContent from "./ItemCardContent";
 import ItemCardHeader from "./headers/ItemCardHeader";
 

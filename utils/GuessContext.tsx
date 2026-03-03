@@ -1,10 +1,17 @@
-import { createContext, ReactNode, useContext, useState } from "react";
-import process_text from "./utils/parser";
-import { GuessType, MatchItem } from "./utils/types";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useState,
+  Dispatch,
+  SetStateAction,
+} from "react";
+import process_text from "./parser";
+import { GuessType, MatchItem } from "./types";
 
 interface GuessContextType {
   guessedItems: GuessType[];
-  setGuessedItems: React.Dispatch<React.SetStateAction<GuessType[]>>;
+  setGuessedItems: Dispatch<SetStateAction<GuessType[]>>;
   textToItemMatch: (textObj: any) => MatchItem[];
   matchToEstimation: (matches: MatchItem[]) => GuessType[];
 }
