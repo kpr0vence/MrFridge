@@ -138,6 +138,9 @@ export default function process_text(
     ITEMS,
     ITEMS_NO_VOWEL,
   );
+  // console.log(
+  //   `Nonfood: ${non_food_match.match} ${non_food_match.confidence} Food: ${food_match.match} ${food_match.confidence}`,
+  // );
   if (determine_if_food(non_food_match, food_match)) {
     // if it is food, return the food object
     return { ...food_match, isFood: true };

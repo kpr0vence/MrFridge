@@ -1,4 +1,8 @@
 export const NonFoodItems: string[] = [
+  "special",
+  "net",
+  "subtotal",
+  "total",
   "food lion",
   "ingles",
   "kroger",

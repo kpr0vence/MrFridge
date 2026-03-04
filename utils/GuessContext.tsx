@@ -26,7 +26,6 @@ export const GuessProvider: React.FC<{ children: ReactNode }> = ({
   // get the lines and then call /parser.ts parse_text() function per line, storing the results
   function textToItemMatch(textObj: any): MatchItem[] {
     const lines = textObj.lines;
-    console.log("Number of lines: " + lines.length());
     const itemNames: MatchItem[] = lines
       .map((line: string) => {
         return parseName(line);
