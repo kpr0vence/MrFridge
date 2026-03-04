@@ -1,9 +1,9 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
-import EditOrManualAdd from "../components/EditOrManualAdd";
 import { useData } from "../../utils/DataContext";
 import { ItemToAdd, ItemType } from "../../utils/types";
+import EditOrManualAdd from "../components/EditOrManualAdd";
 
 export default function Add() {
   const { handleSubmit, handleUpdate } = useData();
@@ -60,26 +60,46 @@ export default function Add() {
 
   // Acutal component
   return (
-    <View>
-      <View className="w-screen flex-row justify-around gap-5 p-4">
-        <Pressable
-          onPress={() => {
-            setIsModalVisible(true);
-          }}
-          className="bg-red-600 p-4 rounded-md"
-        >
-          <Text className="text-white">Add Manually</Text>
-        </Pressable>
+    <View className="bg-white">
+      {/* <View className="w-screen flex-row justify-around gap-5 p-4"> */}
+      <View className="flex-col gap-4 p-4 items-center border-solid border-b-2 border-gray-200">
         <Pressable
           onPress={() => {
             router.push({
               pathname: "/PhotoAdd",
             });
           }}
-          className="bg-green-600 p-4 rounded-md"
+          className="bg-green-600 w-2/3 p-4 rounded-md"
         >
-          <Text className="text-white">Add by Photo</Text>
+          <Text className="text-white text-center">Add by Photo</Text>
         </Pressable>
+        <Text className="text-3xl font-semibold text-center">
+          Upload a Photo of your Receipt
+        </Text>
+        <Text className="mb-4 text-lg ">
+          Mr. Fridge will perform ocular character recognition to read the lines
+          on the receipt, and then estimate what grocery item each line
+          represents, and how long it is expected to last.
+        </Text>
+      </View>
+      <View className="flex-col gap-4 p-4 items-center border-solid border-b-2 border-gray-200">
+        <Pressable
+          onPress={() => {
+            setIsModalVisible(true);
+          }}
+          className="bg-green-800 p-4 rounded-md w-2/3"
+        >
+          <Text className="text-white text-center">Add Manually</Text>
+        </Pressable>
+        <Text className="text-2xl font-semibold text-center">
+          Enter the Name of an Item
+        </Text>
+        <Text className="mb-4 text-lg ">
+          Type in the name of an item and select it's location, and Mr. Fridge
+          will create an estimate for the entered item. This method is best used
+          for single items, or items with very unique names that Mr. Fridge
+          might not recognize.
+        </Text>
       </View>
       <EditOrManualAdd
         editMode={false}

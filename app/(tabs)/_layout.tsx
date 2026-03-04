@@ -1,9 +1,9 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
 import CustomPlusButton from "../components/buttons/CustomPlusButton";
+import AboutHeader from "../components/headers/AboutHeader";
 import AddHeader from "../components/headers/AddHeader";
 import GroceryHeader from "../components/headers/GroceryHeader";
-import NotifsHeader from "../components/headers/NotifsHeader";
 
 export default function TabLayout() {
   return (
@@ -54,11 +54,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="about"
         options={{
-          title: "Notifications",
-          header: () => <NotifsHeader />,
+          title: "About",
+          header: () => <AboutHeader />,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "settings" : "settings-outline"}
+              name={
+                focused ? "information-circle" : "information-circle-outline"
+              }
               color={color}
               size={24}
             />

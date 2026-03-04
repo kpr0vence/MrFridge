@@ -2,11 +2,11 @@ import Constants from "expo-constants";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Platform, View } from "react-native";
+import { useGuessData } from "../utils/GuessContext";
 import BackButton from "./components/buttons/BackButton";
 import AddHeader from "./components/headers/AddHeader";
 import ImagePickerModal from "./components/ImagePickerModal";
 import Processing from "./components/Processing";
-import { useGuessData } from "../utils/GuessContext";
 
 // -------------------------------------
 // Helper Functions
@@ -124,7 +124,6 @@ export default function PhotoAdd() {
     try {
       const itemMatches = textToItemMatch(JSON.parse(text));
       const guessedItems = await matchToEstimation(itemMatches); // We get all the way to guess types which go into DisplayResults
-      console.log("Success, navigating on");
       setGuessedItems(
         guessedItems.filter(
           (item) =>
