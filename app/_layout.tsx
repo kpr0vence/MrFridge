@@ -31,6 +31,7 @@ const createDbIfNeeded = async (db: SQLiteDatabase) => {
 // Register daily task for actual app (not expo go)
 const registerDailyTask = async () => {
   const status = await BackgroundTask.getStatusAsync();
+
   if (status !== BackgroundTask.BackgroundTaskStatus.Available) {
     // Prevents errors while still on Expo Go
     console.log(

@@ -95,4 +95,6 @@ export const NonFoodItems: string[] = [
   "meat",
   "bakery",
   "balance",
+  "grocery",
+  "produce",
 ];
