@@ -37,10 +37,6 @@ export default function Disclaimer() {
           width={200}
         />
       </View>
-      <Text className="text-md italic text-gray-400">
-        This may take a few minutes, feel free to put away your groceries while
-        Mr. Fridge works!
-      </Text>
     </View>
   );
 }

@@ -154,7 +154,6 @@ function find_grocery_item(
     ITEMS,
     ITEMS_NO_VOWEL,
   );
-
   return { non_food_match, food_match };
 }
 
