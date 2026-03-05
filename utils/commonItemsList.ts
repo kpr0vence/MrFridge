@@ -1,4 +1,10 @@
 export const NonFoodItems: string[] = [
+  "special",
+  "cash",
+  "change",
+  "net",
+  "subtotal",
+  "total",
   "food lion",
   "ingles",
   "kroger",
