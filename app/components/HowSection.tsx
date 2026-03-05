@@ -19,6 +19,11 @@ export default function HowSection() {
         </Text>
         <Text className="mb-4 text-lg">
           <Text className="font-lg">{"\u2022"} </Text>
+          Consider cropping the photo to only the relevant section of the
+          receipt.
+        </Text>
+        <Text className="mb-4 text-lg">
+          <Text className="font-lg">{"\u2022"} </Text>
           Start the 'Photo Add' proccess while putting your groceries away. The
           ocular character recognition (OCR) can take a few minutes, so why not
           multitask?
