@@ -19,7 +19,7 @@ type NameGroup = {
 };
 
 interface FoodContextType {
-  parseName: (line: String) => ProcessedText;
+  parseName: (line: string) => ProcessedText;
   estimateItem: (name: string) => Promise<Estimation>;
   estimateItemAtLocation: (
     name: string,
@@ -60,9 +60,9 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({
   }, [loadData]); // Load the mounted data if the db data chages
 
   // Takes over the task of calling parser.py to allow it to pass in the new info
-  function parseName(line: String) {
+  function parseName(line: string) {
     const guess = process_text(line, names, namesNoVowels);
-    // console.log(`The guessed item for "${line}": ${guess.match}`);
+    console.log(`The guessed item for "${line}": ${guess.match}`);
     return guess;
   }
 
@@ -97,9 +97,6 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({
         estimation: result.days_freezer,
         matchFound: true,
       };
-    console.log(
-      `estimate for ${name} is ${estimate.estimation} in the location id ${estimate.locationId}`,
-    );
     return estimate;
   }
 
@@ -133,10 +130,6 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({
         estimation: result.days_freezer,
         matchFound: true,
       };
-
-    console.log(
-      `estimate for ${name} is ${estimate.estimation} in the location id ${estimate.locationId}`,
-    );
     return estimate;
   }
 

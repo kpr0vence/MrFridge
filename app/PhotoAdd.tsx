@@ -1,6 +1,6 @@
 import Constants from "expo-constants";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Platform, View } from "react-native";
 import { useGuessData } from "../utils/GuessContext";
 import BackButton from "./components/buttons/BackButton";
@@ -78,6 +78,10 @@ export default function PhotoAdd() {
   const [processing, setProcessing] = useState<boolean>(false);
   const { setGuessedItems, textToItemMatch, matchToEstimation } =
     useGuessData();
+
+  useEffect(() => {
+    setSelectedImage(undefined);
+  }, []); // Clear image on reload
 
   const photoToTextPost = async () => {
     setProcessing(true);
