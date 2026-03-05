@@ -1,4 +1,4 @@
-import { FoodInfo } from "../../app/utils/types";
+import { FoodInfo } from "../../utils/types";
 
 export const CONDIMENTS: FoodInfo[] = [
   {

@@ -154,6 +154,9 @@ function find_grocery_item(
     ITEMS,
     ITEMS_NO_VOWEL,
   );
+  console.log(
+    `cleaned Name: ${potential_term}\tfood: ${food_match.match}\tnon food: ${non_food_match.match}`,
+  );
   return { non_food_match, food_match };
 }
 

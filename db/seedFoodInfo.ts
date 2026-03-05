@@ -1,3 +1,4 @@
+import { FoodInfo } from "../utils/types";
 import { CONDIMENTS } from "./foodTypes/condiments";
 import { DAIRY } from "./foodTypes/dairy";
 import { FISH } from "./foodTypes/fish";
@@ -8,7 +9,7 @@ import { SNACKS } from "./foodTypes/snakcs";
 import { VEGETABLES } from "./foodTypes/vegetables";
 
 // Just the raw info
-export const FOOD_INFO_DATA = [
+export const FOOD_INFO_DATA: FoodInfo[] = [
   ...FRUITS,
   ...DAIRY,
   ...VEGETABLES,
