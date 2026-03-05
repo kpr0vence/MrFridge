@@ -71,6 +71,7 @@ export const runMigrations = async (db: SQLiteDatabase) => {
     await db.execAsync(`PRAGMA user_version = ${DB_VERSION}`);
     console.log("Migration complete.");
   }
+
   if (currentVersion < 3) {
     console.log("Re-seeding food_info... V3");
     await db.execAsync("DELETE FROM food_info;");
@@ -95,5 +96,13 @@ export const runMigrations = async (db: SQLiteDatabase) => {
       }
     });
     await db.execAsync(`PRAGMA user_version = 3`);
+  }
+
+  if (currentVersion < 4) {
+    console.log("Cleaning bad table values... V4");
+    await db.runAsync("DELETE FROM food_info WHERE name = ?", [
+      "ciabatta bread",
+    ]);
+    await db.execAsync(`PRAGMA user_version = 4`);
   }
 };

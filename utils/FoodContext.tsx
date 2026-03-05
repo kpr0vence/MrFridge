@@ -62,7 +62,7 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({
   // Takes over the task of calling parser.py to allow it to pass in the new info
   function parseName(line: string) {
     const guess = process_text(line, names, namesNoVowels);
-    console.log(`The guessed item for "${line}": ${guess.match}`);
+    // console.log(`The guessed item for "${line}": ${guess.match}`);
     return guess;
   }
 
