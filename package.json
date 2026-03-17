@@ -32,6 +32,7 @@
     "expo-splash-screen": "~31.0.10",
     "expo-sqlite": "~16.0.8",
     "expo-task-manager": "~14.0.9",
+    "expo-updates": "~29.0.16",
     "fuse.js": "^7.1.0",
     "jimp": "^1.6.0",
     "nativewind": "^4.2.1",
