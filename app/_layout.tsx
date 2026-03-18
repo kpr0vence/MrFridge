@@ -5,7 +5,7 @@ import "../global.css";
 import { DataProvider } from "../utils/DataContext";
 import { GuessProvider } from "../utils/GuessContext";
 
-import * as BackgroundTask from "expo-background-task";
+import * as BackgroundFetch from "expo-background-fetch";
 import * as Notifications from "expo-notifications";
 import * as TaskManager from "expo-task-manager";
 
@@ -30,9 +30,9 @@ const createDbIfNeeded = async (db: SQLiteDatabase) => {
 
 // Register daily task for actual app (not expo go)
 const registerDailyTask = async () => {
-  const status = await BackgroundTask.getStatusAsync();
+  const status = await BackgroundFetch.getStatusAsync();
 
-  if (status !== BackgroundTask.BackgroundTaskStatus.Available) {
+  if (status !== BackgroundFetch.BackgroundFetchStatus.Available) {
     // Prevents errors while still on Expo Go
     console.log(
       "Background tasks are restricted/unavailable in this environment. Skipping registration.",
@@ -43,13 +43,13 @@ const registerDailyTask = async () => {
   // Register task if not already registered
   const isRegistered = await TaskManager.isTaskRegisteredAsync(GROCERY_TASK);
   if (!isRegistered) {
-    await BackgroundTask.registerTaskAsync(GROCERY_TASK, {
-      minimumInterval: 24 * 60, // run ~ once per day, the interval is in minutes
+    await BackgroundFetch.registerTaskAsync(GROCERY_TASK, {
+      minimumInterval: 60 * 60 * 24,
+      stopOnTerminate: false,
+      startOnBoot: true,
     });
     console.log("Grocery background task registered.");
   }
-
-  registerDailyTask().catch(console.error);
 };
 
 // Request notification permissions
@@ -61,11 +61,15 @@ const requestNotificationPermissions = async () => {
   }
 
   const requestResult = await Notifications.requestPermissionsAsync();
+  if (requestResult.status !== "granted") {
+    console.log("Notification permission denied");
+  }
 };
 
 export default function RootLayout() {
   useEffect(() => {
     requestNotificationPermissions().catch(console.error);
+    registerDailyTask().catch(console.error);
   }, []);
 
   return (
