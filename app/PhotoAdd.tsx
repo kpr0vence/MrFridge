@@ -13,7 +13,7 @@ import Processing from "./components/Processing";
 const PlaceholderImage = require("../assets/images/mrFridgeLogo.png");
 
 // Use the Railway URL from .env
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL!; // `!` assumes it's defined
+const API_BASE_URL = "https://tesseract-demo-production.up.railway.app";
 
 async function fetchApi(path: string, init: RequestInit): Promise<Response> {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
