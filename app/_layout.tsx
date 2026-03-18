@@ -11,6 +11,7 @@ import * as TaskManager from "expo-task-manager";
 
 import { useEffect } from "react";
 import { GROCERY_TASK } from "../utils/backgroundTasks";
+import { scheduleDailyReminder } from "../utils/dailyNotifs";
 import { FoodProvider } from "../utils/FoodContext";
 
 // Ensure notifications are shown even when the app is in the foreground
@@ -70,6 +71,7 @@ export default function RootLayout() {
   useEffect(() => {
     requestNotificationPermissions().catch(console.error);
     registerDailyTask().catch(console.error);
+    scheduleDailyReminder().catch(console.error);
   }, []);
 
   return (
