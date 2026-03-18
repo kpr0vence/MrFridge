@@ -5,7 +5,7 @@ import "../global.css";
 import { DataProvider } from "../utils/DataContext";
 import { GuessProvider } from "../utils/GuessContext";
 
-import * as BackgroundFetch from "expo-background-fetch";
+import * as backgroundTask from "expo-background-task";
 import * as Notifications from "expo-notifications";
 import * as TaskManager from "expo-task-manager";
 
@@ -30,9 +30,9 @@ const createDbIfNeeded = async (db: SQLiteDatabase) => {
 
 // Register daily task for actual app (not expo go)
 const registerDailyTask = async () => {
-  const status = await BackgroundFetch.getStatusAsync();
+  const status = await backgroundTask.getStatusAsync();
 
-  if (status !== BackgroundFetch.BackgroundFetchStatus.Available) {
+  if (status !== backgroundTask.BackgroundFetchStatus.Available) {
     // Prevents errors while still on Expo Go
     console.log(
       "Background tasks are restricted/unavailable in this environment. Skipping registration.",
@@ -43,7 +43,7 @@ const registerDailyTask = async () => {
   // Register task if not already registered
   const isRegistered = await TaskManager.isTaskRegisteredAsync(GROCERY_TASK);
   if (!isRegistered) {
-    await BackgroundFetch.registerTaskAsync(GROCERY_TASK, {
+    await backgroundTask.registerTaskAsync(GROCERY_TASK, {
       minimumInterval: 60 * 60 * 24,
       stopOnTerminate: false,
       startOnBoot: true,
