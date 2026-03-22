@@ -9,7 +9,7 @@ import * as backgroundTask from "expo-background-task";
 import * as Notifications from "expo-notifications";
 import * as TaskManager from "expo-task-manager";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { GROCERY_TASK } from "../utils/backgroundTasks";
 import { scheduleDailyReminder } from "../utils/dailyNotifs";
 import { FoodProvider } from "../utils/FoodContext";
@@ -29,17 +29,27 @@ const createDbIfNeeded = async (db: SQLiteDatabase) => {
   await runMigrations(db);
 };
 
+async function registerBackgroundTaskAsync() {
+  return backgroundTask.registerTaskAsync(GROCERY_TASK, {
+    minimumInterval: 1440,
+    stopOnTerminate: false,
+    startOnBoot: true,
+  }); // 1440 minutes is 24 hours, I think this was);
+}
+
 // Register daily task for actual app (not expo go)
 const registerDailyTask = async () => {
   const status = await backgroundTask.getStatusAsync();
 
-  if (status !== backgroundTask.BackgroundFetchStatus.Available) {
-    // Prevents errors while still on Expo Go
-    console.log(
-      "Background tasks are restricted/unavailable in this environment. Skipping registration.",
-    );
-    return;
-  }
+  // if (status !== backgroundTask.BackgroundFetchStatus.Available) {
+  //   // Prevents errors while still on Expo Go
+  //   console.log(
+  //     "Background tasks are restricted/unavailable in this environment. Skipping registration.",
+  //   );
+  //   return;
+  // }
+
+  console.log(status);
 
   // Register task if not already registered
   const isRegistered = await TaskManager.isTaskRegisteredAsync(GROCERY_TASK);
@@ -70,11 +80,27 @@ const requestNotificationPermissions = async () => {
 };
 
 export default function RootLayout() {
+  const [isRegistered, setIsRegistered] = useState<boolean>(false);
+  const [status, setStatus] = useState<any | null>(null);
+
   useEffect(() => {
-    requestNotificationPermissions().catch(console.error);
-    registerDailyTask().catch(console.error);
-    scheduleDailyReminder().catch(console.error);
+    updateAsync();
   }, []);
+
+  const updateAsync = async () => {
+    const status = await backgroundTask.getStatusAsync();
+    setStatus(status);
+    const isRegistered = await TaskManager.isTaskRegisteredAsync(GROCERY_TASK);
+    setIsRegistered(isRegistered);
+    if (isRegistered === false) registerDailyTask().catch(console.error);
+    scheduleDailyReminder().catch(console.error);
+  };
+
+  // useEffect(() => {
+  //   requestNotificationPermissions().catch(console.error);
+  //   registerDailyTask().catch(console.error);
+  //   scheduleDailyReminder().catch(console.error);
+  // }, []);
 
   return (
     <SQLiteProvider databaseName="test.db" onInit={createDbIfNeeded}>
