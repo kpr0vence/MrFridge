@@ -6,19 +6,18 @@ import { BackgroundTaskResult, ItemType } from "./types";
 
 export const GROCERY_TASK = "CHECK_EXPIRING_GROCERIES";
 
-
 // Open a standalone DB (for background tasks in production builds)
 const openDb = (): SQLiteDatabase => openDatabaseSync("test.db");
 
 // Fetch items close to or "past" expiration
-const fetchExpiringItems = async (
-  db: SQLiteDatabase,
-): Promise<ItemType[]> => {
+const fetchExpiringItems = async (db: SQLiteDatabase): Promise<ItemType[]> => {
   try {
     const items = await db.getAllAsync<ItemType>(
       "SELECT * FROM items ORDER BY expiration_date;",
     );
-    return items.filter((item) => calculateDaysTilExp(item.expiration_date) <= 4);
+    return items.filter(
+      (item) => calculateDaysTilExp(item.expiration_date) <= 4,
+    );
   } catch (err) {
     console.error("SQL error in fetchExpiringItems:", err);
     return [];
@@ -34,7 +33,7 @@ export const sendExpiringItemsNotification = async (db: SQLiteDatabase) => {
   }
 
   // Create message body
-  let message: string = '';
+  let message: string = "";
   if (expiringItems.length <= 3) {
     message = expiringItems.map((i) => i.name).join(", ");
   } else {
@@ -53,6 +52,7 @@ export const sendExpiringItemsNotification = async (db: SQLiteDatabase) => {
 };
 
 // It has to be defined this way so that it can run in the background
+// 1. Register and create the task
 TaskManager.defineTask(GROCERY_TASK, async () => {
   try {
     const taskDb = openDb();

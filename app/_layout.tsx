@@ -44,11 +44,13 @@ const registerDailyTask = async () => {
   // Register task if not already registered
   const isRegistered = await TaskManager.isTaskRegisteredAsync(GROCERY_TASK);
   if (!isRegistered) {
+    // 2. Register the task (can be done in react components, so it's okay to )
+    // to be here at the app entry point
     await backgroundTask.registerTaskAsync(GROCERY_TASK, {
-      minimumInterval: 60 * 60 * 24,
+      minimumInterval: 1440,
       stopOnTerminate: false,
       startOnBoot: true,
-    });
+    }); // 1440 minutes is 24 hours, I think this was
     console.log("Grocery background task registered.");
   }
 };
