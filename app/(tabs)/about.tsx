@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View } from "react-native";
+import { BackgroundTaskTestingButton } from "../components/BackgroundTaskTesting Button";
 import SectionDialogueButtonGroup from "../components/buttons/SectionDialogueButtonGroup";
 import HowSection from "../components/HowSection";
 import WhoSection from "../components/WhoSection";
@@ -18,6 +19,7 @@ export default function AboutScreen() {
       {activeSection === 1 ? <WhoSection /> : <></>}
       {activeSection === 2 ? <HowSection /> : <></>}
       {activeSection === 3 ? <WhySection /> : <></>}
+      <BackgroundTaskTestingButton />
     </View>
   );
 }
