@@ -14,7 +14,10 @@
       "bundleIdentifier": "com.kpr0vence.MrFridge",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "UIBackgroundModes": ["fetch"]
+        "UIBackgroundModes": ["fetch", "processing"],
+        "BGTaskSchedulerPermittedIdentifiers": [
+          "com.expo.module.backgroundtask.processing"
+        ]
       }
     },
     "android": {
