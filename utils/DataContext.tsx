@@ -15,6 +15,7 @@ import {
   isCloseToExpired,
   isExpired,
 } from "./item.utils";
+import { useNotificationsData } from "./NotificationsContext";
 import { ItemToAdd, ItemType } from "./types";
 
 interface DataContextType {
@@ -66,6 +67,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
   const [pantry, setPantry] = useState<ItemType[]>([]);
   const [freezer, setFreezer] = useState<ItemType[]>([]);
   const [loading, setLoading] = useState(false); // New loading state
+
+  const { scheduleItemReminder, removeItemReminder } = useNotificationsData();
 
   // Load the data into state variables
   const loadData = useCallback(
@@ -123,13 +126,18 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
       const placeholders = buildPlaceholders(items.length);
       const values = buildInsertValues(items); // ← calculateExpirationDate runs safely inside try
 
-      await database.runAsync(
-        `INSERT INTO items (name, expiration_date, location_id) VALUES ${placeholders};`,
+      const addedItems = await database.getAllAsync<ItemType>(
+        `INSERT INTO items (name, expiration_date, location_id) VALUES ${placeholders} RETURNING *;`,
         values,
-      );
+      ); // Modification: add a returning statement so I can then schedule notigs
 
       await database.execAsync("COMMIT;");
       await refreshData();
+
+      if (addedItems) {
+        addedItems.forEach((item) => scheduleItemReminder(item));
+      }
+
       onSuccess?.();
     } catch (error) {
       await database.execAsync("ROLLBACK;").catch(() => {}); // ensure rollback never throws
@@ -151,17 +159,25 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
   ) => {
     setLoading(true);
 
+    // cancel old notif
+    removeItemReminder(id, locationId);
+
+    // Update item
     try {
       const expirationDate = calculateExpirationDate(daysTilExp);
 
-      await database.runAsync(
+      const updatedItem = await database.getFirstAsync<ItemType>(
         `UPDATE items
          SET name = ?, expiration_date = ?, location_id = ?
-         WHERE id = ?`,
+         WHERE id = ? 
+         RETURNING *`,
         [name, expirationDate, locationId, id],
       );
 
       await refreshData();
+      if (updatedItem)
+        // Make new notif
+        scheduleItemReminder(updatedItem);
       onSuccess?.();
     } catch (error) {
       onFailure?.(error);
@@ -180,7 +196,15 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
     setLoading(true);
 
     try {
-      await database.runAsync("DELETE FROM items WHERE id = ?;", [id]);
+      const deletedItem = await database.getFirstAsync<ItemType>(
+        "DELETE FROM items WHERE id = ? RETURNING *;",
+        [id],
+      );
+
+      // Remove old notification
+      if (deletedItem)
+        removeItemReminder(deletedItem.id, deletedItem.location_id);
+
       await refreshData();
       onSuccess?.();
     } catch (error) {

@@ -9,10 +9,10 @@ import * as backgroundTask from "expo-background-task";
 import * as Notifications from "expo-notifications";
 import * as TaskManager from "expo-task-manager";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { GROCERY_TASK } from "../utils/backgroundTasks";
-import { scheduleDailyReminder } from "../utils/dailyNotifs";
 import { FoodProvider } from "../utils/FoodContext";
+import { NotificationsProvider } from "../utils/NotificationsContext";
 
 // Ensure notifications are shown even when the app is in the foreground
 Notifications.setNotificationHandler({
@@ -80,56 +80,43 @@ const requestNotificationPermissions = async () => {
 };
 
 export default function RootLayout() {
-  const [isRegistered, setIsRegistered] = useState<boolean>(false);
-  const [status, setStatus] = useState<any | null>(null);
-
   useEffect(() => {
-    updateAsync();
+    requestNotificationPermissions().catch(console.error);
   }, []);
-
-  const updateAsync = async () => {
-    const status = await backgroundTask.getStatusAsync();
-    setStatus(status);
-    const isRegistered = await TaskManager.isTaskRegisteredAsync(GROCERY_TASK);
-    setIsRegistered(isRegistered);
-    if (isRegistered === false) registerDailyTask().catch(console.error);
-    scheduleDailyReminder().catch(console.error);
-  };
-
-  // useEffect(() => {
-  //   requestNotificationPermissions().catch(console.error);
-  //   registerDailyTask().catch(console.error);
-  //   scheduleDailyReminder().catch(console.error);
-  // }, []);
 
   return (
     <SQLiteProvider databaseName="test.db" onInit={createDbIfNeeded}>
       <FoodProvider>
-        <DataProvider>
-          <GuessProvider>
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-              <Stack.Screen
-                name="itemsDisplay"
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen name="PhotoAdd" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="DisplayResults"
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="SuccessfulSubmitMessage"
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="FailureSubmitMessage"
-                options={{ headerShown: false }}
-              />
-            </Stack>
-          </GuessProvider>
-        </DataProvider>
+        <NotificationsProvider>
+          <DataProvider>
+            <GuessProvider>
+              <Stack>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+                <Stack.Screen
+                  name="itemsDisplay"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="PhotoAdd"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="DisplayResults"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="SuccessfulSubmitMessage"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="FailureSubmitMessage"
+                  options={{ headerShown: false }}
+                />
+              </Stack>
+            </GuessProvider>
+          </DataProvider>
+        </NotificationsProvider>
       </FoodProvider>
     </SQLiteProvider>
   );
