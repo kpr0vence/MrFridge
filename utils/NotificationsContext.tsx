@@ -41,26 +41,12 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
     console.log("Daily 9 AM reminder scheduled.");
   }
 
-  // Debug
-  async function viewTable() {
-    const results = await database.getAllAsync<NotificationTableType>(
-      `SELECT * FROM notifications`,
-    );
-
-    await results.forEach((result) =>
-      console.log(`${result.notification_id} - ${result.food_info_id}`),
-    );
-  }
-
   // Get all stored notif id's associated with an food id
   async function getAllNotifIdsForItem(item: ItemType): Promise<string[]> {
-    console.log(`Looking for food item id: ${item.id}`);
-    await viewTable();
     const results = await database.getAllAsync<NotificationTableType>(
       `SELECT * FROM notifications WHERE food_info_id = ?`,
       [item.id],
     );
-    console.log("NotifIds for " + item.name + ": " + results);
     return results.map((result) => result.notification_id);
   }
 
@@ -87,7 +73,6 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
   function generateThreeDaysTillExp(item: ItemType): Date {
     const newDate = new Date();
     const daysTilExp = calculateDaysTilExp(item.expiration_date);
-    console.log(item.expiration_date);
     newDate.setDate(newDate.getDate() + (daysTilExp - 3)); // -3 to get three days before exp
 
     return newDate;
@@ -105,7 +90,6 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
         `DELETE FROM notifications WHERE notification_id = ?`,
         [notifId],
       );
-      console.log(`Notification Id ${notifId} canceled.`);
     }
   }
 

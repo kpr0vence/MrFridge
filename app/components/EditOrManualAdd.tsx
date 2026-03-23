@@ -40,6 +40,12 @@ export default function EditOrManualAdd({
   const [estimation, setEstimation] = useState<string>("0");
   const [locationStatus, setLocationStatus] = useState<1 | 2 | 3>(1);
 
+  function resetToDefaults() {
+    setName("");
+    setEstimation("0");
+    setLocationStatus(1);
+  }
+
   useEffect(() => {
     if (originalItem && editMode) {
       setName(originalItem.name);
@@ -149,6 +155,7 @@ export default function EditOrManualAdd({
             <View className="flex-row justify-between w-full gap-">
               <Pressable
                 onPress={() => {
+                  resetToDefaults();
                   modalVisible.setIsModalVisible(false);
                 }} // handle discard changes
                 className=" rounded-full p-4 items-center justify-center bg-red-600"
