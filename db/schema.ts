@@ -34,3 +34,11 @@ export const CREATE_ITEMS_INDEX = `
   CREATE INDEX IF NOT EXISTS idx_items
   ON items(id);
 `;
+
+export const CREATE_NOTIFICATIONS_TABLE = `
+  CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    notification_id TEXT NOT NULL,
+    food_info_id INTEGER NOT NULL
+  )
+`;

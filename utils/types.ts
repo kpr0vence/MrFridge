@@ -85,3 +85,9 @@ export type Estimation = {
   estimation: number;
   matchFound: boolean;
 };
+
+export type NotificationTableType = {
+  id: number;
+  notification_id: string;
+  food_info_id: number;
+};

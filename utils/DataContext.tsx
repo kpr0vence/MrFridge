@@ -135,7 +135,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
       await refreshData();
 
       if (addedItems) {
-        addedItems.forEach((item) => scheduleItemReminder(item));
+        for (const addedItem of addedItems) {
+          await scheduleItemReminder(addedItem);
+        }
       }
 
       onSuccess?.();
@@ -159,11 +161,17 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
   ) => {
     setLoading(true);
 
-    // cancel old notif
-    removeItemReminder(id, locationId);
-
     // Update item
     try {
+      // Remove old notif
+      const originalItem = await database.getFirstAsync<ItemType>(
+        `SELECT * FROM items WHERE id = ?`,
+        [id],
+      );
+
+      if (originalItem) await removeItemReminder(originalItem);
+
+      // Update item
       const expirationDate = calculateExpirationDate(daysTilExp);
 
       const updatedItem = await database.getFirstAsync<ItemType>(
@@ -177,7 +185,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
       await refreshData();
       if (updatedItem)
         // Make new notif
-        scheduleItemReminder(updatedItem);
+        await scheduleItemReminder(updatedItem);
       onSuccess?.();
     } catch (error) {
       onFailure?.(error);
@@ -202,8 +210,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
       );
 
       // Remove old notification
-      if (deletedItem)
-        removeItemReminder(deletedItem.id, deletedItem.location_id);
+      if (deletedItem) await removeItemReminder(deletedItem);
 
       await refreshData();
       onSuccess?.();

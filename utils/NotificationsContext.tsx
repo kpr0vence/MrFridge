@@ -1,11 +1,12 @@
 import * as Notifications from "expo-notifications";
+import { useSQLiteContext } from "expo-sqlite";
 import { createContext, ReactNode, useContext } from "react";
 import { calculateDaysTilExp } from "./item.utils";
-import { ItemType } from "./types";
+import { ItemType, NotificationTableType } from "./types";
 
 interface NotificationsContextType {
   scheduleDailyReminder(): Promise<void>;
-  removeItemReminder(id: number, locationId: number): Promise<void>;
+  removeItemReminder(item: ItemType): Promise<void>;
   scheduleItemReminder(item: ItemType): Promise<void>;
 }
 
@@ -17,6 +18,7 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   // Static non-unique notification identifier
   const DAILY_NOTIFICATION_ID = "daily-kitchen-reminder";
+  const database = useSQLiteContext();
 
   async function scheduleDailyReminder() {
     // Cancel existing ones to avoid duplicates
@@ -39,9 +41,35 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
     console.log("Daily 9 AM reminder scheduled.");
   }
 
-  // Helper function to put the logic on one place
-  function generateNotifId(item: ItemType): string {
-    return `${item.location_id}${item.id}`;
+  // Debug
+  async function viewTable() {
+    const results = await database.getAllAsync<NotificationTableType>(
+      `SELECT * FROM notifications`,
+    );
+
+    await results.forEach((result) =>
+      console.log(`${result.notification_id} - ${result.food_info_id}`),
+    );
+  }
+
+  // Get all stored notif id's associated with an food id
+  async function getAllNotifIdsForItem(item: ItemType): Promise<string[]> {
+    console.log(`Looking for food item id: ${item.id}`);
+    await viewTable();
+    const results = await database.getAllAsync<NotificationTableType>(
+      `SELECT * FROM notifications WHERE food_info_id = ?`,
+      [item.id],
+    );
+    console.log("NotifIds for " + item.name + ": " + results);
+    return results.map((result) => result.notification_id);
+  }
+
+  // Insert one notification Id into the table
+  async function storeNotifIdForItem(item: ItemType, notifId: string) {
+    await database.runAsync(
+      `INSERT INTO notifications (notification_id, food_info_id) VALUES (?, ?)`,
+      [notifId, item.id],
+    );
   }
 
   function generateThreeDayMessage(item: ItemType): string {
@@ -66,84 +94,76 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
   }
 
   // Removing an item needs to get rid of both of its notifications
-  async function removeItemReminder(id: number, locationId: number) {
-    const notificationIdBase = `${locationId}${id}`;
-    const threeDaysId = `${notificationIdBase}three`;
-    const nowDaysId = `${notificationIdBase}now`;
+  async function removeItemReminder(item: ItemType) {
+    const notifIds = await getAllNotifIdsForItem(item);
 
-    await Notifications.cancelScheduledNotificationAsync(threeDaysId);
-    await Notifications.cancelScheduledNotificationAsync(nowDaysId);
-    console.log(`Notifications ${threeDaysId} and ${nowDaysId} canceled.`);
+    for (const notifId of notifIds) {
+      await Notifications.cancelScheduledNotificationAsync(notifId); // Delete notifs
+
+      await database.runAsync(
+        // Delete the item in the db
+        `DELETE FROM notifications WHERE notification_id = ?`,
+        [notifId],
+      );
+      console.log(`Notification Id ${notifId} canceled.`);
+    }
   }
 
-  async function scheduleThreeDayReminder(
-    item: ItemType,
-    notificationIdBase: string,
-  ) {
-    const threeDaysId = `${notificationIdBase}three`;
+  async function scheduleThreeDayReminder(item: ItemType) {
     const threeDaysTilExp: Date = generateThreeDaysTillExp(item);
     const now = new Date();
-
-    await Notifications.cancelScheduledNotificationAsync(threeDaysId);
-    console.log(
-      `Attempted to remove old notificaion (if exists): ${threeDaysId}`,
-    );
 
     if (threeDaysTilExp <= now) return; // Don't schedule a three day reminder if theres less than 3 days left
 
     // Make a new notification with the provided info
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "Mr. Fridge",
-        body: generateThreeDayMessage(item),
-        sound: true,
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: threeDaysTilExp,
-      },
-      identifier: threeDaysId,
-    });
+    const response: Promise<string> =
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Mr. Fridge",
+          body: generateThreeDayMessage(item),
+          sound: true,
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: threeDaysTilExp,
+        },
+      });
+
+    await storeNotifIdForItem(item, await response); // Add new notification to db
     console.log(
-      "Three Day Notification scheduled for " + threeDaysTilExp + " with ID:",
-      threeDaysId,
+      `Three Day Notification scheduled for ${item.name}, id ${item.id} on ${threeDaysTilExp} with ID ${await response} `,
     );
   }
 
-  async function scheduleNowReminder(
-    item: ItemType,
-    notificationIdBase: string,
-  ) {
-    const nowDaysId = `${notificationIdBase}now`;
-    const expDate = new Date(item.expiration_date);
-    await Notifications.cancelScheduledNotificationAsync(nowDaysId);
-    console.log(
-      `Attempted to remove old notificaion (if exists): ${nowDaysId}`,
-    );
+  async function scheduleNowReminder(item: ItemType) {
+    let expDate = new Date(item.expiration_date);
 
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "Mr. Fridge",
-        body: generateTodayMessage(item),
-        sound: true,
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: expDate,
-      },
-      identifier: nowDaysId,
-    });
+    const daysTilExp = calculateDaysTilExp(item.expiration_date);
+    if (daysTilExp === 0) expDate = new Date();
+
+    const response: Promise<string> =
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Mr. Fridge",
+          body: generateTodayMessage(item),
+          sound: true,
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: expDate,
+        },
+      });
+    await storeNotifIdForItem(item, await response); // Add new notification to db
     console.log(
-      "Same Day Notification scheduled for " + expDate + " with ID:",
-      nowDaysId,
+      `Same Day Notification scheduled for ${item.name}, id ${item.id} on ${expDate} with ID ${await response}`,
     );
   }
 
   // Responsible for making a three day and same day notif
   async function scheduleItemReminder(item: ItemType) {
-    const notificationId = generateNotifId(item);
-    scheduleThreeDayReminder(item, notificationId);
-    scheduleNowReminder(item, notificationId);
+    await removeItemReminder(item);
+    await scheduleThreeDayReminder(item);
+    await scheduleNowReminder(item);
   }
 
   return (
