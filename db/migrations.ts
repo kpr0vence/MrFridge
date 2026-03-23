@@ -8,10 +8,11 @@ import {
   CREATE_ITEMS_TABLE,
 } from "./schema";
 
+import * as Notifications from "expo-notifications";
 import { FOOD_INFO_DATA } from "./seedFoodInfo";
 
-export const DB_VERSION = 4; // Tracks what I've already done for better versioning
-// The latest version of the database
+export const DB_VERSION = 5;
+// Tracks what I've already done for better versioning the latest version of the database
 // The later user_version (currentVersion) tracks the version that the user has
 
 // Help create the food_info table
@@ -103,6 +104,14 @@ export const runMigrations = async (db: SQLiteDatabase) => {
     await db.runAsync("DELETE FROM food_info WHERE name = ?", [
       "ciabatta bread",
     ]);
+    await db.execAsync(`PRAGMA user_version = 4`);
+  }
+
+  if (currentVersion < 5) {
+    console.log(
+      "Removing all notifications for clean testing of refactored notifications.",
+    );
+    await Notifications.cancelAllScheduledNotificationsAsync();
     await db.execAsync(`PRAGMA user_version = 4`);
   }
 };

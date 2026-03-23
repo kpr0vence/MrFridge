@@ -44,10 +44,16 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
     return `${item.location_id}${item.id}`;
   }
 
-  function generateMessage(item: ItemType): string {
+  function generateThreeDayMessage(item: ItemType): string {
     const itemTitleCase =
       item.name.charAt(0).toUpperCase() + item.name.slice(1);
     return `${itemTitleCase} is 3 days from expiration!`;
+  }
+
+  function generateTodayMessage(item: ItemType): string {
+    const itemTitleCase =
+      item.name.charAt(0).toUpperCase() + item.name.slice(1);
+    return `${itemTitleCase} is very close to expiration, consider eating it soon!`;
   }
 
   function generateThreeDaysTillExp(item: ItemType): Date {
@@ -59,42 +65,85 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
     return newDate;
   }
 
+  // Removing an item needs to get rid of both of its notifications
   async function removeItemReminder(id: number, locationId: number) {
-    const notificationId = `${locationId}${id}`;
-    await Notifications.cancelScheduledNotificationAsync(notificationId);
-    console.log(`Notification ${notificationId} canceled.`);
+    const notificationIdBase = `${locationId}${id}`;
+    const threeDaysId = `${notificationIdBase}three`;
+    const nowDaysId = `${notificationIdBase}now`;
+
+    await Notifications.cancelScheduledNotificationAsync(threeDaysId);
+    await Notifications.cancelScheduledNotificationAsync(nowDaysId);
+    console.log(`Notifications ${threeDaysId} and ${nowDaysId} canceled.`);
   }
 
-  //   Function to be given an item and schedule it's thingie
-  async function scheduleItemReminder(item: ItemType) {
-    //Given an id and location, build a unique notif id
-    const notificationId = generateNotifId(item);
+  async function scheduleThreeDayReminder(
+    item: ItemType,
+    notificationIdBase: string,
+  ) {
+    const threeDaysId = `${notificationIdBase}three`;
     const threeDaysTilExp: Date = generateThreeDaysTillExp(item);
+    const now = new Date();
 
-    // Delete notif if it's already there (not yet sure if this simply
-    // fails silently if its not there or if I need to do a check of some typ first)
-    await Notifications.cancelScheduledNotificationAsync(notificationId);
+    await Notifications.cancelScheduledNotificationAsync(threeDaysId);
     console.log(
-      `Attempted to remove old notificaion (if exists): ${notificationId}`,
+      `Attempted to remove old notificaion (if exists): ${threeDaysId}`,
     );
+
+    if (threeDaysTilExp <= now) return; // Don't schedule a three day reminder if theres less than 3 days left
 
     // Make a new notification with the provided info
     await Notifications.scheduleNotificationAsync({
       content: {
         title: "Mr. Fridge",
-        body: generateMessage(item),
+        body: generateThreeDayMessage(item),
         sound: true,
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
         date: threeDaysTilExp,
       },
-      identifier: notificationId,
+      identifier: threeDaysId,
     });
     console.log(
-      "Notification scheduled for " + threeDaysTilExp + " day(s) with ID:",
-      notificationId,
+      "Three Day Notification scheduled for " + threeDaysTilExp + " with ID:",
+      threeDaysId,
     );
+  }
+
+  async function scheduleNowReminder(
+    item: ItemType,
+    notificationIdBase: string,
+  ) {
+    const nowDaysId = `${notificationIdBase}now`;
+    const expDate = new Date(item.expiration_date);
+    await Notifications.cancelScheduledNotificationAsync(nowDaysId);
+    console.log(
+      `Attempted to remove old notificaion (if exists): ${nowDaysId}`,
+    );
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Mr. Fridge",
+        body: generateTodayMessage(item),
+        sound: true,
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: expDate,
+      },
+      identifier: nowDaysId,
+    });
+    console.log(
+      "Same Day Notification scheduled for " + expDate + " with ID:",
+      nowDaysId,
+    );
+  }
+
+  // Responsible for making a three day and same day notif
+  async function scheduleItemReminder(item: ItemType) {
+    const notificationId = generateNotifId(item);
+    scheduleThreeDayReminder(item, notificationId);
+    scheduleNowReminder(item, notificationId);
   }
 
   return (
