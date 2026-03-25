@@ -126,6 +126,7 @@ export default function EditOrManualAdd({
                 value={name}
                 onChangeText={(newText) => handleNameChange(newText)}
                 onEndEditing={handleNameEditEnd}
+                onBlur={handleNameEditEnd}
                 className="rounded-md p-4 mt-0 bg-gray-200 text-xl text-gray-500 w-3/4"
               />
             </View>

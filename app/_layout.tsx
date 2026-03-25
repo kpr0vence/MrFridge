@@ -5,12 +5,10 @@ import "../global.css";
 import { DataProvider } from "../utils/DataContext";
 import { GuessProvider } from "../utils/GuessContext";
 
-import * as backgroundTask from "expo-background-task";
 import * as Notifications from "expo-notifications";
-import * as TaskManager from "expo-task-manager";
 
+import { NotificationRequest } from "expo-notifications/build/Notifications.types";
 import { useEffect } from "react";
-import { GROCERY_TASK } from "../utils/backgroundTasks";
 import { FoodProvider } from "../utils/FoodContext";
 import { NotificationsProvider } from "../utils/NotificationsContext";
 
@@ -29,45 +27,15 @@ const createDbIfNeeded = async (db: SQLiteDatabase) => {
   await runMigrations(db);
 };
 
-async function registerBackgroundTaskAsync() {
-  return backgroundTask.registerTaskAsync(GROCERY_TASK, {
-    minimumInterval: 1440,
-    stopOnTerminate: false,
-    startOnBoot: true,
-  }); // 1440 minutes is 24 hours, I think this was);
-}
-
-// Register daily task for actual app (not expo go)
-const registerDailyTask = async () => {
-  const status = await backgroundTask.getStatusAsync();
-
-  // if (status !== backgroundTask.BackgroundFetchStatus.Available) {
-  //   // Prevents errors while still on Expo Go
-  //   console.log(
-  //     "Background tasks are restricted/unavailable in this environment. Skipping registration.",
-  //   );
-  //   return;
-  // }
-
-  console.log(status);
-
-  // Register task if not already registered
-  const isRegistered = await TaskManager.isTaskRegisteredAsync(GROCERY_TASK);
-  if (!isRegistered) {
-    // 2. Register the task (can be done in react components, so it's okay to )
-    // to be here at the app entry point
-    await backgroundTask.registerTaskAsync(GROCERY_TASK, {
-      minimumInterval: 1440,
-      stopOnTerminate: false,
-      startOnBoot: true,
-    }); // 1440 minutes is 24 hours, I think this was
-    console.log("Grocery background task registered.");
-  }
-};
-
 // Request notification permissions
 const requestNotificationPermissions = async () => {
-  const settings = await Notifications.getPermissionsAsync();
+  const settings = await Notifications.requestPermissionsAsync({
+    ios: {
+      allowAlert: true,
+      allowBadge: true,
+      allowSound: true,
+    },
+  });
 
   if (settings.status === "granted") {
     return;
@@ -79,9 +47,16 @@ const requestNotificationPermissions = async () => {
   }
 };
 
+async function verifyNotificationsAreScheduled() {
+  const scheduled: NotificationRequest[] =
+    await Notifications.getAllScheduledNotificationsAsync();
+  console.log(`${scheduled.length} notifications scheduled`);
+}
+
 export default function RootLayout() {
   useEffect(() => {
     requestNotificationPermissions().catch(console.error);
+    // verifyNotificationsAreScheduled();
   }, []);
 
   return (

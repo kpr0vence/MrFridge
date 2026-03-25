@@ -22,7 +22,7 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
 
   async function scheduleDailyReminder() {
     // Cancel existing ones to avoid duplicates
-    await Notifications.cancelAllScheduledNotificationsAsync();
+    // await Notifications.cancelAllScheduledNotificationsAsync();
 
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -94,24 +94,28 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
   }
 
   async function scheduleThreeDayReminder(item: ItemType) {
+    if ((await Notifications.getAllScheduledNotificationsAsync()).length > 50) {
+      return;
+    } // iOS caps at 64 scheduled notifs, this is a short term solution
+
     const threeDaysTilExp: Date = generateThreeDaysTillExp(item);
     const now = new Date();
 
     if (threeDaysTilExp <= now) return; // Don't schedule a three day reminder if theres less than 3 days left
+    threeDaysTilExp.setHours(9, 0, 0, 0);
 
     // Make a new notification with the provided info
-    const response: Promise<string> =
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Mr. Fridge",
-          body: generateThreeDayMessage(item),
-          sound: true,
-        },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DATE,
-          date: threeDaysTilExp,
-        },
-      });
+    const response: string = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Mr. Fridge",
+        body: generateThreeDayMessage(item),
+        sound: true,
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: threeDaysTilExp,
+      },
+    });
 
     await storeNotifIdForItem(item, await response); // Add new notification to db
     console.log(
@@ -120,10 +124,16 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
   }
 
   async function scheduleNowReminder(item: ItemType) {
+    if ((await Notifications.getAllScheduledNotificationsAsync()).length > 50) {
+      return;
+    } // iOS caps at 64 scheduled notifs, this is a short term solution
     let expDate = new Date(item.expiration_date);
 
     const daysTilExp = calculateDaysTilExp(item.expiration_date);
     if (daysTilExp === 0) expDate = new Date();
+
+    if (daysTilExp > 0) expDate.setHours(9, 0, 0, 0);
+    else expDate.setHours(expDate.getHours() + 4);
 
     const response: Promise<string> =
       await Notifications.scheduleNotificationAsync({
