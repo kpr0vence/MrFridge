@@ -6,12 +6,14 @@ import {
   CREATE_FOOD_INFO_NO_VOWELS_INDEX,
   CREATE_FOOD_INFO_TABLE,
   CREATE_ITEMS_TABLE,
+  CREATE_NOTIFICATIONS_TABLE,
 } from "./schema";
 
+import * as Notifications from "expo-notifications";
 import { FOOD_INFO_DATA } from "./seedFoodInfo";
 
-export const DB_VERSION = 4; // Tracks what I've already done for better versioning
-// The latest version of the database
+export const DB_VERSION = 6;
+// Tracks what I've already done for better versioning the latest version of the database
 // The later user_version (currentVersion) tracks the version that the user has
 
 // Help create the food_info table
@@ -104,5 +106,34 @@ export const runMigrations = async (db: SQLiteDatabase) => {
       "ciabatta bread",
     ]);
     await db.execAsync(`PRAGMA user_version = 4`);
+  }
+
+  if (currentVersion < 5) {
+    console.log("Cleaning notifications... V5");
+
+    console.log(
+      "Removing all notifications for clean testing of refactored notifications.",
+    );
+    await Notifications.cancelAllScheduledNotificationsAsync();
+    await db.execAsync(`PRAGMA user_version = 5`);
+  }
+
+  if (currentVersion < 7) {
+    console.log("Notifications table... V5");
+    await Notifications.cancelAllScheduledNotificationsAsync();
+    await db.execAsync(CREATE_NOTIFICATIONS_TABLE);
+
+    console.log("Creating new table to manage notification IDs");
+    await db.execAsync(`PRAGMA user_version = 7`);
+  }
+
+  if (currentVersion < 9) {
+    console.log("Purge and recreate notig table... V8");
+    await Notifications.cancelAllScheduledNotificationsAsync();
+    await db.execAsync(`DROP TABLE IF EXISTS notifications;`);
+    await db.execAsync(CREATE_NOTIFICATIONS_TABLE);
+
+    console.log("Creating new table to manage notification IDs");
+    await db.execAsync(`PRAGMA user_version = 10`);
   }
 };

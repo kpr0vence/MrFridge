@@ -5,14 +5,12 @@ import "../global.css";
 import { DataProvider } from "../utils/DataContext";
 import { GuessProvider } from "../utils/GuessContext";
 
-import * as backgroundTask from "expo-background-task";
 import * as Notifications from "expo-notifications";
-import * as TaskManager from "expo-task-manager";
 
+import { NotificationRequest } from "expo-notifications/build/Notifications.types";
 import { useEffect } from "react";
-import { GROCERY_TASK } from "../utils/backgroundTasks";
-import { scheduleDailyReminder } from "../utils/dailyNotifs";
 import { FoodProvider } from "../utils/FoodContext";
+import { NotificationsProvider } from "../utils/NotificationsContext";
 
 // Ensure notifications are shown even when the app is in the foreground
 Notifications.setNotificationHandler({
@@ -29,33 +27,15 @@ const createDbIfNeeded = async (db: SQLiteDatabase) => {
   await runMigrations(db);
 };
 
-// Register daily task for actual app (not expo go)
-const registerDailyTask = async () => {
-  const status = await backgroundTask.getStatusAsync();
-
-  if (status !== backgroundTask.BackgroundFetchStatus.Available) {
-    // Prevents errors while still on Expo Go
-    console.log(
-      "Background tasks are restricted/unavailable in this environment. Skipping registration.",
-    );
-    return;
-  }
-
-  // Register task if not already registered
-  const isRegistered = await TaskManager.isTaskRegisteredAsync(GROCERY_TASK);
-  if (!isRegistered) {
-    await backgroundTask.registerTaskAsync(GROCERY_TASK, {
-      minimumInterval: 60 * 60 * 24,
-      stopOnTerminate: false,
-      startOnBoot: true,
-    });
-    console.log("Grocery background task registered.");
-  }
-};
-
 // Request notification permissions
 const requestNotificationPermissions = async () => {
-  const settings = await Notifications.getPermissionsAsync();
+  const settings = await Notifications.requestPermissionsAsync({
+    ios: {
+      allowAlert: true,
+      allowBadge: true,
+      allowSound: true,
+    },
+  });
 
   if (settings.status === "granted") {
     return;
@@ -67,41 +47,51 @@ const requestNotificationPermissions = async () => {
   }
 };
 
+async function verifyNotificationsAreScheduled() {
+  const scheduled: NotificationRequest[] =
+    await Notifications.getAllScheduledNotificationsAsync();
+  console.log(`${scheduled.length} notifications scheduled`);
+}
+
 export default function RootLayout() {
   useEffect(() => {
     requestNotificationPermissions().catch(console.error);
-    registerDailyTask().catch(console.error);
-    scheduleDailyReminder().catch(console.error);
+    // verifyNotificationsAreScheduled();
   }, []);
 
   return (
     <SQLiteProvider databaseName="test.db" onInit={createDbIfNeeded}>
       <FoodProvider>
-        <DataProvider>
-          <GuessProvider>
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-              <Stack.Screen
-                name="itemsDisplay"
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen name="PhotoAdd" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="DisplayResults"
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="SuccessfulSubmitMessage"
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="FailureSubmitMessage"
-                options={{ headerShown: false }}
-              />
-            </Stack>
-          </GuessProvider>
-        </DataProvider>
+        <NotificationsProvider>
+          <DataProvider>
+            <GuessProvider>
+              <Stack>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+                <Stack.Screen
+                  name="itemsDisplay"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="PhotoAdd"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="DisplayResults"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="SuccessfulSubmitMessage"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="FailureSubmitMessage"
+                  options={{ headerShown: false }}
+                />
+              </Stack>
+            </GuessProvider>
+          </DataProvider>
+        </NotificationsProvider>
       </FoodProvider>
     </SQLiteProvider>
   );

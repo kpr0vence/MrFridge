@@ -4,13 +4,7 @@ const DAILY_NOTIFICATION_ID = "daily-kitchen-reminder";
 
 export async function scheduleDailyReminder() {
   // Cancel existing ones to avoid duplicates
-  const existing = await Notifications.getAllScheduledNotificationsAsync();
-
-  const alreadyExists = existing.some(
-    (n: { identifier: string }) => n.identifier === DAILY_NOTIFICATION_ID,
-  );
-
-  if (alreadyExists) return;
+  await Notifications.cancelAllScheduledNotificationsAsync();
 
   await Notifications.scheduleNotificationAsync({
     content: {

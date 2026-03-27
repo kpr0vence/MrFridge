@@ -18,6 +18,8 @@ export default function AboutScreen() {
       {activeSection === 1 ? <WhoSection /> : <></>}
       {activeSection === 2 ? <HowSection /> : <></>}
       {activeSection === 3 ? <WhySection /> : <></>}
+
+      {/* <GeneralNotifsTest /> */}
     </View>
   );
 }

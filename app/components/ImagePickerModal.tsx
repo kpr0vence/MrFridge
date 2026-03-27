@@ -1,6 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import type { SetStateAction } from "react";
-import { Alert, Linking, Platform, View } from "react-native";
+import { Alert, Linking, Platform, Pressable, View } from "react-native";
 import PickImageButton from "./buttons/PickImageButton";
 import ImageViewer from "./ImageViewer";
 
@@ -70,13 +70,7 @@ export default function ImagePickerModal({
   };
 
   return (
-    <View className="pt-10 flex-col items-stretch justify-between gap-4">
-      <View className="flex-col items-center">
-        <ImageViewer
-          imgSource={PlaceholderImage}
-          selectedImage={selectedImage}
-        />
-      </View>
+    <View className="pt-5 flex-col items-stretch justify-between gap-4">
       <View className="flex-row justify-center gap-4">
         <PickImageButton
           theme="tertiary"
@@ -89,6 +83,17 @@ export default function ImagePickerModal({
           onPress={pickImageAsync}
         />
         <PickImageButton label="Use this photo" onPress={photoToTextPost} />
+      </View>
+      <View className="flex-col items-center">
+        <Pressable
+          className="w-full flex-1 items-center h-max"
+          onPress={pickImageAsync}
+        >
+          <ImageViewer
+            imgSource={PlaceholderImage}
+            selectedImage={selectedImage}
+          />
+        </Pressable>
       </View>
     </View>
   );

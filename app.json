@@ -13,9 +13,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.kpr0vence.MrFridge",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false,
-        "UIBackgroundModes": ["fetch"]
-      }
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "usesAppleSignIn": false
     },
     "android": {
       "adaptiveIcon": {
@@ -34,6 +34,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-notifications",
       [
         "expo-splash-screen",
         {
