@@ -107,20 +107,16 @@ export default function VerifyGuessFormItem({
 
   return (
     <View className="border-b-2 border-gray-300">
-      {item.confidence ? <Text>Confidence: {item.confidence}</Text> : <></>}
-      {item.originalLine ? (
-        <Text>Original Line Read From Receipt: {item.originalLine}</Text>
-      ) : (
-        <></>
-      )}
       <View className="flex-row gap-3 items-center mb-4 justify-between p-5 pb-0">
-        <View className="flex-col gap-4">
+        <View className="flex-col gap-4 flex-1 min-w-0">
           <View className="bg-gray-200 rounded-md p-4">
             <TextInput
               value={name}
               onChangeText={handleNameChange}
               onEndEditing={handleNameEditEnd}
+              multiline={true}
               className="text-lg font-bold text-center"
+              textAlignVertical="top"
             />
           </View>
 
@@ -162,6 +158,13 @@ export default function VerifyGuessFormItem({
           <Ionicons name="checkmark" color="#fff" size={24} />
         </Pressable>
       </View>
+      {item.originalLine ? (
+        <Text className="p-4 text-sm ">
+          Original Line Read From Receipt: {item.originalLine}
+        </Text>
+      ) : (
+        <></>
+      )}
     </View>
   );
 }

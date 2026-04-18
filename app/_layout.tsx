@@ -1,6 +1,5 @@
 import { Stack } from "expo-router";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
-import { AutocompleteDropdownContextProvider } from "react-native-autocomplete-dropdown";
 import { runMigrations } from "../db/migrations";
 import "../global.css";
 import { DataProvider } from "../utils/DataContext";
@@ -69,35 +68,30 @@ export default function RootLayout() {
         <NotificationsProvider>
           <DataProvider>
             <GuessProvider>
-              <AutocompleteDropdownContextProvider>
-                <Stack>
-                  <Stack.Screen
-                    name="(tabs)"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen name="+not-found" />
-                  <Stack.Screen
-                    name="itemsDisplay"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="PhotoAdd"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="DisplayResults"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="SuccessfulSubmitMessage"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="FailureSubmitMessage"
-                    options={{ headerShown: false }}
-                  />
-                </Stack>
-              </AutocompleteDropdownContextProvider>
+              <Stack>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+                <Stack.Screen
+                  name="itemsDisplay"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="PhotoAdd"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="DisplayResults"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="SuccessfulSubmitMessage"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="FailureSubmitMessage"
+                  options={{ headerShown: false }}
+                />
+              </Stack>
             </GuessProvider>
           </DataProvider>
         </NotificationsProvider>

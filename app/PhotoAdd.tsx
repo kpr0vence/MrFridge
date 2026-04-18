@@ -81,7 +81,7 @@ export default function PhotoAdd() {
       console.error("[ocr] upload error:", err);
       alert("Failed to process image. Please try again.");
     } finally {
-      setProcessing(false);
+      // setProcessing(false);
     }
   };
 

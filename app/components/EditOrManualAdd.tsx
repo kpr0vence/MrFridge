@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import {
   AutocompleteDropdown,
+  AutocompleteDropdownContextProvider,
   AutocompleteDropdownItem,
 } from "react-native-autocomplete-dropdown";
 import { useFoodData } from "../../utils/FoodContext";
@@ -41,7 +42,7 @@ export default function EditOrManualAdd({
   //   const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
   const { estimateItemAtLocation, items } = useFoodData();
   const foodItemsAsOBJ = items.map((item) => {
-    return { id: item.id.toString(), label: item.name };
+    return { id: item.id.toString(), title: item.name };
   });
 
   const [name, setName] = useState<string>("");
@@ -129,8 +130,6 @@ export default function EditOrManualAdd({
     }
   }
 
-  console.log("DATASET", foodItemsAsOBJ);
-
   return (
     <Modal
       animationType="fade"
@@ -138,90 +137,97 @@ export default function EditOrManualAdd({
       visible={modalVisible.isModalVisable}
       onRequestClose={() => modalVisible.setIsModalVisible(false)}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        {/*  <View className="">
+      <AutocompleteDropdownContextProvider>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          {/*  <View className="">
         <View className="*/}
-        <View className="flex-1 items-center justify-center bg-black/50">
-          <View className="bg-white rounded-md w-4/5 flex-col gap-4  items-center mb-4 justify-between p-5">
-            <View className="flex-row items-center justify-between gap-4">
-              <Text className="text-gray-800 text-xl font-bold">Name</Text>
-              <View style={{ zIndex: 1000, elevation: 1000 }}>
-                <AutocompleteDropdown
-                  clearOnFocus={false}
-                  closeOnBlur={true}
-                  closeOnSubmit={false}
-                  initialValue={{ id: "2" }} // or just '2'
-                  onSelectItem={setSelectedItem}
-                  dataSet={foodItemsAsOBJ}
-                  inputContainerStyle={{ backgroundColor: "#e5e7eb" }}
-                  suggestionsListContainerStyle={{
-                    backgroundColor: "#fff",
-                    zIndex: 2000,
-                    elevation: 2000,
+          <View className="flex-1 items-center justify-center bg-black/50">
+            <View className="bg-white rounded-md w-4/5 flex-col gap-4  items-center mb-4 justify-between p-5">
+              <View className="flex-row items-center justify-between gap-4">
+                <Text className="text-gray-800 text-xl font-bold">Name</Text>
+                <View>
+                  <AutocompleteDropdown
+                    dataSet={foodItemsAsOBJ}
+                    onSelectItem={() => {}}
+                    direction="down"
+                    suggestionsListMaxHeight={200}
+                    inputContainerStyle={{
+                      backgroundColor: "#e5e7eb", // Tailwind gray-200
+                      borderRadius: 6,
+                    }}
+                    textInputProps={{
+                      placeholder: "Type or Select an Item",
+                      style: {
+                        color: "#374151", // gray-700
+                        paddingHorizontal: 12,
+                      },
+                      placeholderTextColor: "#9ca3af", // gray-400
+                    }}
+                    suggestionsListContainerStyle={{
+                      backgroundColor: "#fff",
+                      borderRadius: 6,
+                      borderWidth: 1,
+                      borderColor: "#e5e7eb",
+                    }}
+                    renderItem={(item) => (
+                      <View style={{ padding: 12 }}>
+                        <Text style={{ color: "#374151" }}>{item.title}</Text>
+                      </View>
+                    )}
+                  />
+                </View>
+              </View>
+
+              <View className="flex-row gap-4 items-center">
+                <TextInput
+                  value={estimation}
+                  onChangeText={(newText) => {
+                    handleEstimationChange(newText);
                   }}
-                  textInputProps={{
-                    placeholder: "Select item",
-                    style: { color: "#000" },
-                  }}
+                  keyboardType="numeric"
+                  className="rounded-md p-4 mt-0 bg-gray-200 text-xl w-1/3 text-gray-500"
+                />
+                <Text className="text-gray-800 text-xl font-bold">
+                  Days Until Expiration
+                </Text>
+              </View>
+
+              <View className="flex-row items-center justify-between gap-4">
+                <Text className="text-gray-800 text-xl font-bold">
+                  Stored In
+                </Text>
+                <DialogueButtonGroup
+                  location={locationStatus}
+                  setLocation={setLocationStatus}
+                  locationChange={handleLocationChange}
                 />
               </View>
-              {/* <TextInput
-                placeholder="Name"
-                value={name}
-                onChangeText={(newText) => handleNameChange(newText)}
-                onEndEditing={handleNameEditEnd}
-                onBlur={handleNameEditEnd}
-                className="rounded-md p-4 mt-0 bg-gray-200 text-xl text-gray-500 w-3/4"
-              /> */}
-            </View>
+              <View className="flex-row justify-between w-full gap-">
+                <Pressable
+                  onPress={() => {
+                    resetToDefaults();
+                    modalVisible.setIsModalVisible(false);
+                  }} // handle discard changes
+                  className=" rounded-full p-4 items-center justify-center bg-red-600"
+                >
+                  <Text className="text-white text-lg font-bold">
+                    {editMode ? "Discard Changes" : "Cancel Add"}
+                  </Text>
+                </Pressable>
 
-            <View className="flex-row gap-4 items-center">
-              <TextInput
-                value={estimation}
-                onChangeText={(newText) => {
-                  handleEstimationChange(newText);
-                }}
-                keyboardType="numeric"
-                className="rounded-md p-4 mt-0 bg-gray-200 text-xl w-1/3 text-gray-500"
-              />
-              <Text className="text-gray-800 text-xl font-bold">
-                Days Until Expiration
-              </Text>
-            </View>
-
-            <View className="flex-row items-center justify-between gap-4">
-              <Text className="text-gray-800 text-xl font-bold">Stored In</Text>
-              <DialogueButtonGroup
-                location={locationStatus}
-                setLocation={setLocationStatus}
-                locationChange={handleLocationChange}
-              />
-            </View>
-            <View className="flex-row justify-between w-full gap-">
-              <Pressable
-                onPress={() => {
-                  resetToDefaults();
-                  modalVisible.setIsModalVisible(false);
-                }} // handle discard changes
-                className=" rounded-full p-4 items-center justify-center bg-red-600"
-              >
-                <Text className="text-white text-lg font-bold">
-                  {editMode ? "Discard Changes" : "Cancel Add"}
-                </Text>
-              </Pressable>
-
-              <Pressable
-                onPress={handleSubmit} // handle Confrim
-                className="rounded-full p-4 items-center justify-center bg-green-600"
-              >
-                <Text className="text-white text-lg font-bold">
-                  {editMode ? "Update Item" : "Add Item"}
-                </Text>
-              </Pressable>
+                <Pressable
+                  onPress={handleSubmit} // handle Confrim
+                  className="rounded-full p-4 items-center justify-center bg-green-600"
+                >
+                  <Text className="text-white text-lg font-bold">
+                    {editMode ? "Update Item" : "Add Item"}
+                  </Text>
+                </Pressable>
+              </View>
             </View>
           </View>
-        </View>
-      </TouchableWithoutFeedback>
+        </TouchableWithoutFeedback>
+      </AutocompleteDropdownContextProvider>
     </Modal>
   );
 }

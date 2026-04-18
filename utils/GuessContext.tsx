@@ -28,7 +28,7 @@ export const GuessProvider: React.FC<{ children: ReactNode }> = ({
     const lines = textObj.lines;
     const itemNames: MatchItem[] = lines
       .map((line: string) => {
-        return { ...parseName(line), line };
+        return { ...parseName(line), originalLine: line };
       })
       .filter((item: MatchItem) => item.isFood); // Filters out returned items flagged as not food
 
