@@ -1,7 +1,9 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
+import { AutocompleteDropdown } from "react-native-autocomplete-dropdown";
 import { useData } from "../../utils/DataContext";
+import { useFoodData } from "../../utils/FoodContext";
 import { ItemToAdd, ItemType } from "../../utils/types";
 import EditOrManualAdd from "../components/EditOrManualAdd";
 
@@ -11,6 +13,13 @@ export default function Add() {
   const [actionSuccessful, setActionSuccessful] = useState<
     boolean | undefined
   >();
+
+  // ! Temp:
+  const { estimateItemAtLocation, items } = useFoodData();
+  const foodItemsAsOBJ = items.map((item) => {
+    return { id: item.id.toString(), label: item.name };
+  });
+
   function actionIsSuccessful() {
     setActionSuccessful(true);
   }
@@ -109,6 +118,37 @@ export default function Add() {
           setIsModalVisible: setIsModalVisible,
         }}
       />
+      <View style={{ zIndex: 1000, elevation: 1000 }}>
+        <AutocompleteDropdown
+          dataSet={foodItemsAsOBJ}
+          onSelectItem={() => {}}
+          direction="down"
+          suggestionsListMaxHeight={200}
+          inputContainerStyle={{
+            backgroundColor: "#e5e7eb", // Tailwind gray-200
+            borderRadius: 6,
+          }}
+          textInputProps={{
+            placeholder: "Name",
+            style: {
+              color: "#374151", // gray-700
+              paddingHorizontal: 12,
+            },
+            placeholderTextColor: "#9ca3af", // gray-400
+          }}
+          suggestionsListContainerStyle={{
+            backgroundColor: "#fff",
+            borderRadius: 6,
+            borderWidth: 1,
+            borderColor: "#e5e7eb",
+          }}
+          renderItem={(item) => (
+            <View style={{ padding: 12 }}>
+              <Text style={{ color: "#374151" }}>{item.id}</Text>
+            </View>
+          )}
+        />
+      </View>
     </View>
   );
 }

@@ -41,7 +41,7 @@ export default function EditOrManualAdd({
   //   const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
   const { estimateItemAtLocation, items } = useFoodData();
   const foodItemsAsOBJ = items.map((item) => {
-    return { id: item.id.toString(), title: item.name };
+    return { id: item.id.toString(), label: item.name };
   });
 
   const [name, setName] = useState<string>("");
@@ -77,7 +77,7 @@ export default function EditOrManualAdd({
       setName(selectedItem.title);
       handleNameEditEnd();
     }
-  });
+  }, [selectedItem]);
 
   function handleNameChange(text: string) {
     setName(text);
@@ -129,6 +129,8 @@ export default function EditOrManualAdd({
     }
   }
 
+  console.log("DATASET", foodItemsAsOBJ);
+
   return (
     <Modal
       animationType="fade"
@@ -143,14 +145,34 @@ export default function EditOrManualAdd({
           <View className="bg-white rounded-md w-4/5 flex-col gap-4  items-center mb-4 justify-between p-5">
             <View className="flex-row items-center justify-between gap-4">
               <Text className="text-gray-800 text-xl font-bold">Name</Text>
-              <TextInput
+              <View style={{ zIndex: 1000, elevation: 1000 }}>
+                <AutocompleteDropdown
+                  clearOnFocus={false}
+                  closeOnBlur={true}
+                  closeOnSubmit={false}
+                  initialValue={{ id: "2" }} // or just '2'
+                  onSelectItem={setSelectedItem}
+                  dataSet={foodItemsAsOBJ}
+                  inputContainerStyle={{ backgroundColor: "#e5e7eb" }}
+                  suggestionsListContainerStyle={{
+                    backgroundColor: "#fff",
+                    zIndex: 2000,
+                    elevation: 2000,
+                  }}
+                  textInputProps={{
+                    placeholder: "Select item",
+                    style: { color: "#000" },
+                  }}
+                />
+              </View>
+              {/* <TextInput
                 placeholder="Name"
                 value={name}
                 onChangeText={(newText) => handleNameChange(newText)}
                 onEndEditing={handleNameEditEnd}
                 onBlur={handleNameEditEnd}
                 className="rounded-md p-4 mt-0 bg-gray-200 text-xl text-gray-500 w-3/4"
-              />
+              /> */}
             </View>
 
             <View className="flex-row gap-4 items-center">
@@ -198,15 +220,6 @@ export default function EditOrManualAdd({
               </Pressable>
             </View>
           </View>
-          <AutocompleteDropdown
-            clearOnFocus={false}
-            closeOnBlur={true}
-            closeOnSubmit={false}
-            initialValue={{ id: "2" }} // or just '2'
-            onSelectItem={setSelectedItem}
-            dataSet={foodItemsAsOBJ}
-          />
-          ;
         </View>
       </TouchableWithoutFeedback>
     </Modal>
