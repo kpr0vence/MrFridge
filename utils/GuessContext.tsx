@@ -28,9 +28,9 @@ export const GuessProvider: React.FC<{ children: ReactNode }> = ({
     const lines = textObj.lines;
     const itemNames: MatchItem[] = lines
       .map((line: string) => {
-        return parseName(line);
+        return { ...parseName(line), line };
       })
-      .filter((item: MatchItem) => item.isFood);
+      .filter((item: MatchItem) => item.isFood); // Filters out returned items flagged as not food
 
     return itemNames;
   }
@@ -45,8 +45,10 @@ export const GuessProvider: React.FC<{ children: ReactNode }> = ({
         return {
           id: index,
           guessedItem: item.match,
-          location: locationId, // Just default to fridge for now
+          location: locationId,
           daysTilExp: estimation.toString(),
+          originalLine: item.originalLine ? item.originalLine : null,
+          confidence: item.confidence,
         };
       }),
     );

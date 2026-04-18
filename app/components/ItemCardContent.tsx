@@ -54,6 +54,9 @@ export default function ItemCardContent({ item }: ItemCardContentProps) {
     setIsModalVisible(false);
   };
 
+  // ! New: Edited name of delete button to be more clear and have the
+  // correct meaning for both having eaten something AND wanted to delete
+  // it without eating it
   return (
     <View key={item.id} className="flex-row justify-between">
       <Pressable
@@ -61,7 +64,7 @@ export default function ItemCardContent({ item }: ItemCardContentProps) {
         onPress={onEatenPress}
       >
         <Ionicons name="checkmark-circle-outline" color={"#fff"} size={28} />
-        <Text className="text-white text-lg">Eaten!</Text>
+        <Text className="text-white text-lg">Remove Item</Text>
       </Pressable>
       <Pressable
         className="p-4 rounded-md flex-row gap-2 items-center w-fit"

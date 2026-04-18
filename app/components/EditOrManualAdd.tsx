@@ -8,6 +8,10 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import {
+  AutocompleteDropdown,
+  AutocompleteDropdownItem,
+} from "react-native-autocomplete-dropdown";
 import { useFoodData } from "../../utils/FoodContext";
 import { calculateDaysTilExp } from "../../utils/item.utils";
 import { Estimation, ItemToAdd, ItemType } from "../../utils/types";
@@ -35,10 +39,17 @@ export default function EditOrManualAdd({
   onUpdate,
 }: props) {
   //   const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
-  const { estimateItemAtLocation } = useFoodData();
+  const { estimateItemAtLocation, items } = useFoodData();
+  const foodItemsAsOBJ = items.map((item) => {
+    return { id: item.id.toString(), title: item.name };
+  });
+
   const [name, setName] = useState<string>("");
   const [estimation, setEstimation] = useState<string>("0");
   const [locationStatus, setLocationStatus] = useState<1 | 2 | 3>(1);
+
+  const [selectedItem, setSelectedItem] =
+    useState<AutocompleteDropdownItem | null>(null);
 
   function resetToDefaults() {
     setName("");
@@ -55,6 +66,18 @@ export default function EditOrManualAdd({
       setLocationStatus(originalItem.location_id);
     }
   }, [originalItem]);
+
+  // ! New: Clear form each time it opes
+  useEffect(() => {
+    resetToDefaults();
+  }, []);
+
+  useEffect(() => {
+    if (selectedItem?.title) {
+      setName(selectedItem.title);
+      handleNameEditEnd();
+    }
+  });
 
   function handleNameChange(text: string) {
     setName(text);
@@ -87,7 +110,6 @@ export default function EditOrManualAdd({
 
   function handleSubmit() {
     // either way, we're going to pass all of the options to the hanlde change function we're given. Then clonse
-    // TODO: Later add success and failure indicators
     if (editMode && originalItem && onUpdate) {
       const updateItem: ItemType = {
         id: originalItem?.id,
@@ -176,6 +198,15 @@ export default function EditOrManualAdd({
               </Pressable>
             </View>
           </View>
+          <AutocompleteDropdown
+            clearOnFocus={false}
+            closeOnBlur={true}
+            closeOnSubmit={false}
+            initialValue={{ id: "2" }} // or just '2'
+            onSelectItem={setSelectedItem}
+            dataSet={foodItemsAsOBJ}
+          />
+          ;
         </View>
       </TouchableWithoutFeedback>
     </Modal>

@@ -107,6 +107,12 @@ export default function VerifyGuessFormItem({
 
   return (
     <View className="border-b-2 border-gray-300">
+      {item.confidence ? <Text>Confidence: {item.confidence}</Text> : <></>}
+      {item.originalLine ? (
+        <Text>Original Line Read From Receipt: {item.originalLine}</Text>
+      ) : (
+        <></>
+      )}
       <View className="flex-row gap-3 items-center mb-4 justify-between p-5 pb-0">
         <View className="flex-col gap-4">
           <View className="bg-gray-200 rounded-md p-4">

@@ -25,6 +25,7 @@ interface FoodContextType {
     name: string,
     locationId: 1 | 2 | 3,
   ) => Promise<Estimation>;
+  items: FoodContextInfo[];
 }
 
 const FoodContext = createContext<FoodContextType | undefined>(undefined);
@@ -62,12 +63,16 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({
   // Takes over the task of calling parser.py to allow it to pass in the new info
   function parseName(line: string) {
     const guess = process_text(line, names, namesNoVowels);
-    // console.log(`The guessed item for "${line}": ${guess.match}`);
+    /*
+     match: string;
+     confidence: number;
+     isFood: true
+    */
     return guess;
   }
 
   async function estimateItem(name: string) {
-    // Given the name, get it's estimation from the db
+    // Given the name, get it's match from the db
     let estimate: Estimation = {
       locationId: 1,
       estimation: 7,
@@ -75,7 +80,7 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({
     }; //   default to 7 days in fridge
     const result = await database.getFirstAsync<FoodContextInfo>(
       "SELECT * FROM food_info WHERE name LIKE ?;",
-      [name],
+      [name.toLowerCase()],
     );
 
     // Now we should have an item, next find the first location it has data for, return that
@@ -135,7 +140,7 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <FoodContext.Provider
-      value={{ parseName, estimateItem, estimateItemAtLocation }}
+      value={{ parseName, estimateItem, estimateItemAtLocation, items }}
     >
       {children}
     </FoodContext.Provider>

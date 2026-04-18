@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
+import { AutocompleteDropdownContextProvider } from "react-native-autocomplete-dropdown";
 import { runMigrations } from "../db/migrations";
 import "../global.css";
 import { DataProvider } from "../utils/DataContext";
@@ -7,10 +8,13 @@ import { GuessProvider } from "../utils/GuessContext";
 
 import * as Notifications from "expo-notifications";
 
+import { Buffer } from "buffer";
 import { NotificationRequest } from "expo-notifications/build/Notifications.types";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { FoodProvider } from "../utils/FoodContext";
 import { NotificationsProvider } from "../utils/NotificationsContext";
+
+global.Buffer = Buffer; // To get autocomplete to work
 
 // Ensure notifications are shown even when the app is in the foreground
 Notifications.setNotificationHandler({
@@ -65,30 +69,35 @@ export default function RootLayout() {
         <NotificationsProvider>
           <DataProvider>
             <GuessProvider>
-              <Stack>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="+not-found" />
-                <Stack.Screen
-                  name="itemsDisplay"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="PhotoAdd"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="DisplayResults"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="SuccessfulSubmitMessage"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="FailureSubmitMessage"
-                  options={{ headerShown: false }}
-                />
-              </Stack>
+              <AutocompleteDropdownContextProvider>
+                <Stack>
+                  <Stack.Screen
+                    name="(tabs)"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen name="+not-found" />
+                  <Stack.Screen
+                    name="itemsDisplay"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="PhotoAdd"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="DisplayResults"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="SuccessfulSubmitMessage"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="FailureSubmitMessage"
+                    options={{ headerShown: false }}
+                  />
+                </Stack>
+              </AutocompleteDropdownContextProvider>
             </GuessProvider>
           </DataProvider>
         </NotificationsProvider>
