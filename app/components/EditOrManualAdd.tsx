@@ -72,6 +72,13 @@ export default function EditOrManualAdd({
   useEffect(() => {
     // Clean form on reopen
     resetToDefaults();
+    if (originalItem && editMode) {
+      setName(originalItem.name);
+      setEstimation(
+        calculateDaysTilExp(originalItem.expiration_date).toString(),
+      );
+      setLocationStatus(originalItem.location_id);
+    }
   }, []);
 
   async function handleNameEditEnd(input: string) {
