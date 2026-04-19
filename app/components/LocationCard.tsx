@@ -1,6 +1,6 @@
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import type { ComponentProps } from "react";
 import { Text, View } from "react-native";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useData } from "../../utils/DataContext";
 import ItemsExpiredBubble from "./ItemsExpiredBubble";
 import ItemsNearExpiredBubble from "./ItemsNearExpiredBubble";
@@ -48,7 +48,7 @@ export default function LocationCard({
               {dataFromLocation.length}
             </Text>
             <Text className="text-xl text-gray-500 pb-2 w-28">
-              Items in the {location}
+              Item{dataFromLocation.length === 1 ? "" : "s"} in the {location}
             </Text>
           </View>
           <ToItemsButton />

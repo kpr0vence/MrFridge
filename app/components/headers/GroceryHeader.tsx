@@ -12,7 +12,9 @@ export default function GroceryHeader() {
       <View className="pt-safe-offset-5 p-5 bg-[#41d78f] justify-between flex-row">
         <View className="flex-row gap-4 items-end align-bot">
           <Text className="text-6xl text-white">{total_items}</Text>
-          <Text className="text-xl text-white pb-2 w-24">Items Stored</Text>
+          <Text className="text-xl text-white pb-2 w-24">
+            Item{total_items === 1 ? "" : "s"} Stored
+          </Text>
         </View>
 
         <View className="flex-row gap-4 items-end">

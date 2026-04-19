@@ -128,6 +128,8 @@ export default function EditOrManualAdd({
       };
       onAdd(addItem);
     }
+
+    resetToDefaults();
   }
 
   // How the recommendations are filtered
