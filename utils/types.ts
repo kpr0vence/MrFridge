@@ -16,12 +16,15 @@ export type GuessType = {
   guessedItem: string;
   location: 1 | 2 | 3;
   daysTilExp: string;
+  originalLine?: string | null;
+  confidence?: number;
 };
 
 export type MatchItem = {
   match: string;
   confidence: number;
   isFood: boolean;
+  originalLine?: string;
 };
 
 export type LocationType = "fridge" | "freezer" | "pantry";
@@ -82,8 +85,9 @@ export type FoodContextInfo = {
 
 export type Estimation = {
   locationId: 1 | 2 | 3;
-  estimation: number;
+  estimation: number; // Estimated days
   matchFound: boolean;
+  confidence?: number;
 };
 
 export type NotificationTableType = {

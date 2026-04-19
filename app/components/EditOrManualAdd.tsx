@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
+  FlatList,
   Keyboard,
   Modal,
   Pressable,
   Text,
   TextInput,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
@@ -19,14 +21,11 @@ interface props {
     isModalVisable: boolean;
     setIsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   };
-
   originalItem?: ItemType;
   onAdd?: (item: ItemToAdd) => void;
   onUpdate?: (item: ItemType) => void;
 }
 
-// Handles either editing an existing item, where the item and its estimation are already given
-//  OR adding a new item where not even the item name exists yet
 export default function EditOrManualAdd({
   editMode,
   originalItem,
@@ -34,16 +33,30 @@ export default function EditOrManualAdd({
   onAdd,
   onUpdate,
 }: props) {
-  //   const [isModalVisible, setIsModalVisible] = useState<boolean>(true);
-  const { estimateItemAtLocation } = useFoodData();
-  const [name, setName] = useState<string>("");
-  const [estimation, setEstimation] = useState<string>("0");
+  const { estimateItemAtLocation, items } = useFoodData();
+
+  const foodItems = useMemo(() => items.map((item) => item.name), [items]);
+
+  const [name, setName] = useState("");
+  const [estimation, setEstimation] = useState("0");
   const [locationStatus, setLocationStatus] = useState<1 | 2 | 3>(1);
+
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [debouncedName, setDebouncedName] = useState("");
+
+  // makes the text you enter NOT jitter (that was so annoying omg)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedName(name);
+    }, 120);
+    return () => clearTimeout(timeout);
+  }, [name]);
 
   function resetToDefaults() {
     setName("");
     setEstimation("0");
     setLocationStatus(1);
+    setShowSuggestions(false);
   }
 
   useEffect(() => {
@@ -56,50 +69,60 @@ export default function EditOrManualAdd({
     }
   }, [originalItem]);
 
-  function handleNameChange(text: string) {
-    setName(text);
-  }
+  useEffect(() => {
+    // Clean form on reopen
+    resetToDefaults();
+    if (originalItem && editMode) {
+      setName(originalItem.name);
+      setEstimation(
+        calculateDaysTilExp(originalItem.expiration_date).toString(),
+      );
+      setLocationStatus(originalItem.location_id);
+    }
+  }, []);
 
-  async function handleNameEditEnd() {
-    // try to get an estimation based on the name, update it if we get one?
+  async function handleNameEditEnd(input: string) {
+    if (!input) return;
+
     const estimation: Estimation = await estimateItemAtLocation(
-      name.toLocaleLowerCase(),
+      input.toLowerCase(),
       locationStatus,
     );
-    if (estimation.matchFound) setEstimation(estimation.estimation.toString());
-  }
 
-  function handleEstimationChange(text: string) {
-    // Allow empty string and "-"
-    if (/^-?\d*$/.test(text)) {
-      setEstimation(text);
+    if (estimation.matchFound) {
+      setEstimation(estimation.estimation.toString());
     }
   }
 
   async function handleLocationChange(newLocation: 1 | 2 | 3) {
     setLocationStatus(newLocation);
+
+    if (!name) return;
+
     const estimation: Estimation = await estimateItemAtLocation(
       name.toLowerCase(),
       newLocation,
     );
-    if (estimation.matchFound) setEstimation(estimation.estimation.toString());
+
+    if (estimation.matchFound) {
+      setEstimation(estimation.estimation.toString());
+    }
   }
 
   function handleSubmit() {
-    // either way, we're going to pass all of the options to the hanlde change function we're given. Then clonse
-    // TODO: Later add success and failure indicators
     if (editMode && originalItem && onUpdate) {
       const updateItem: ItemType = {
-        id: originalItem?.id,
-        name: name,
+        id: originalItem.id,
+        name,
         expiration_date: estimation.toString(),
         location_id: locationStatus,
       };
       onUpdate(updateItem);
     }
+
     if (onAdd) {
       const addItem: ItemToAdd = {
-        name: name,
+        name,
         locationId: locationStatus,
         daysTilExp: estimation.toString(),
       };
@@ -107,45 +130,112 @@ export default function EditOrManualAdd({
     }
   }
 
+  // How the recommendations are filtered
+  const filtered = useMemo(() => {
+    if (!debouncedName) return [];
+
+    return foodItems
+      .filter((item) =>
+        item.toLowerCase().includes(debouncedName.toLowerCase()),
+      )
+      .slice(0, 20);
+  }, [debouncedName, foodItems]);
+
+  const exactMatch = foodItems.some(
+    (item) => item.toLowerCase() === name.toLowerCase(),
+  );
+
+  const suggestions =
+    name.length > 0 && !exactMatch ? [`Use "${name}"`, ...filtered] : filtered;
+
   return (
     <Modal
       animationType="fade"
-      transparent={true}
+      transparent
       visible={modalVisible.isModalVisable}
       onRequestClose={() => modalVisible.setIsModalVisible(false)}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        {/*  <View className="">
-        <View className="*/}
+      <TouchableWithoutFeedback
+        onPress={() => {
+          Keyboard.dismiss;
+          setShowSuggestions(false);
+        }}
+      >
         <View className="flex-1 items-center justify-center bg-black/50">
-          <View className="bg-white rounded-md w-4/5 flex-col gap-4  items-center mb-4 justify-between p-5">
-            <View className="flex-row items-center justify-between gap-4">
-              <Text className="text-gray-800 text-xl font-bold">Name</Text>
-              <TextInput
-                placeholder="Name"
-                value={name}
-                onChangeText={(newText) => handleNameChange(newText)}
-                onEndEditing={handleNameEditEnd}
-                onBlur={handleNameEditEnd}
-                className="rounded-md p-4 mt-0 bg-gray-200 text-xl text-gray-500 w-3/4"
-              />
+          <View className="bg-white rounded-md w-4/5 gap-4 p-5">
+            <View className="w-full  flex-row items-center  gap-4">
+              <Text className="text-gray-800 text-xl font-bold mb-2">Name</Text>
+
+              <View className="relative w-[80%]">
+                <TextInput
+                  value={name}
+                  onChangeText={(text) => {
+                    setName(text);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => {
+                    handleNameEditEnd(name);
+                  }}
+                  placeholder="Enter or Select Name"
+                  className="bg-gray-200 rounded-md px-3 py-3 text-gray-700"
+                />
+
+                {showSuggestions && suggestions.length > 0 && (
+                  <View className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md max-h-48 z-50">
+                    <FlatList
+                      keyboardShouldPersistTaps="always"
+                      data={suggestions}
+                      keyExtractor={(item, index) => item + index}
+                      renderItem={({ item }) => {
+                        const isCustom = item.startsWith("Use ");
+
+                        return (
+                          <TouchableOpacity
+                            onPress={() => {
+                              const value = isCustom ? name : item;
+
+                              setName(value);
+                              setShowSuggestions(false);
+                              handleNameEditEnd(value);
+                            }}
+                            className="px-3 py-3 active:bg-gray-100"
+                          >
+                            <Text
+                              className={`${
+                                isCustom
+                                  ? "text-blue-600 italic"
+                                  : "text-gray-700"
+                              }`}
+                            >
+                              {item}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      }}
+                    />
+                  </View>
+                )}
+              </View>
             </View>
 
+            {/* ESTIMATION */}
             <View className="flex-row gap-4 items-center">
               <TextInput
                 value={estimation}
-                onChangeText={(newText) => {
-                  handleEstimationChange(newText);
+                onChangeText={(text) => {
+                  if (/^-?\d*$/.test(text)) setEstimation(text);
                 }}
                 keyboardType="numeric"
-                className="rounded-md p-4 mt-0 bg-gray-200 text-xl w-1/3 text-gray-500"
+                className="rounded-md p-4 bg-gray-200 text-xl w-1/3 text-gray-500"
               />
               <Text className="text-gray-800 text-xl font-bold">
                 Days Until Expiration
               </Text>
             </View>
 
-            <View className="flex-row items-center justify-between gap-4">
+            {/* LOCATION */}
+            <View className="flex-row items-center gap-4">
               <Text className="text-gray-800 text-xl font-bold">Stored In</Text>
               <DialogueButtonGroup
                 location={locationStatus}
@@ -153,13 +243,15 @@ export default function EditOrManualAdd({
                 locationChange={handleLocationChange}
               />
             </View>
-            <View className="flex-row justify-between w-full gap-">
+
+            {/* ACTIONS */}
+            <View className="flex-row justify-between">
               <Pressable
                 onPress={() => {
                   resetToDefaults();
                   modalVisible.setIsModalVisible(false);
-                }} // handle discard changes
-                className=" rounded-full p-4 items-center justify-center bg-red-600"
+                }}
+                className="rounded-full p-4 bg-red-600"
               >
                 <Text className="text-white text-lg font-bold">
                   {editMode ? "Discard Changes" : "Cancel Add"}
@@ -167,8 +259,8 @@ export default function EditOrManualAdd({
               </Pressable>
 
               <Pressable
-                onPress={handleSubmit} // handle Confrim
-                className="rounded-full p-4 items-center justify-center bg-green-600"
+                onPress={handleSubmit}
+                className="rounded-full p-4 bg-green-600"
               >
                 <Text className="text-white text-lg font-bold">
                   {editMode ? "Update Item" : "Add Item"}

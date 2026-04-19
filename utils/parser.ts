@@ -2,6 +2,8 @@ import Fuse from "fuse.js";
 import { NonFoodItems } from "./commonItemsList";
 // import Fuse from 'https://deno.land/x/fuse@v7.1.0/dist/fuse.min.mjs'
 
+// TODO: Finish refining the logic, consulting findings
+
 type Match = {
   match: string;
   confidence: number;
@@ -38,7 +40,8 @@ const devoweled_non_food_items = NonFoodItems.map((item) => devowel(item));
 
 const fuse_options = {
   includeScore: true,
-  threshold: 0.8, // how forgiving the match is 0 = strict 1 = most forgiving
+  threshold: 0.4, // ! New: how forgiving the match is 0 = strict 1 = most forgiving
+  // ^^ Modified upon algorithm revisions
   distance: 1, // How far apart the characters are before score is affected.
   ignoreLocation: true, // removes preference for matches near start
   minMatchCharLength: 2,
@@ -70,6 +73,26 @@ function fuzzy_match_single_term(
   };
 }
 
+// ! New
+function fuzzy_match_full_line(
+  fuse: Fuse<string>,
+  product_line: string,
+): Match {
+  const normalized_line = product_line.toLowerCase();
+  const searchResult = fuse.search(normalized_line);
+
+  if (searchResult.length === 0) {
+    return { match: "", confidence: 0 };
+  }
+
+  const confidence = calculate_confidence(searchResult[0].score);
+
+  return {
+    match: searchResult[0].item,
+    confidence,
+  };
+}
+
 function fuzzy_match_term_vowels_and_none(
   term: string,
   fuse: Fuse<string>,
@@ -78,6 +101,7 @@ function fuzzy_match_term_vowels_and_none(
   devoweledItems: string[],
 ): Match {
   if (!term) return { match: "undefined", confidence: 0 };
+
   if (term.length < 3) return { match: "", confidence: 0 };
 
   const normal = fuzzy_match_single_term(fuse, normalize(term));
@@ -87,12 +111,31 @@ function fuzzy_match_term_vowels_and_none(
     devowel(normalize(term)),
   );
 
-  return noVowels.confidence > normal.confidence
-    ? {
-        match: items[devoweledItems.indexOf(noVowels.match)],
-        confidence: noVowels.confidence,
-      }
-    : normal;
+  // ! New: The devoweled version, while helfpul for reading reciepts can be too similar
+  // to a bunch of terms, giving it too much power. Prefer the normal match if it
+  // is moderately to very confident (> 70)
+  if (noVowels.confidence > normal.confidence && normal.confidence < 70) {
+    return {
+      match: items[devoweledItems.indexOf(noVowels.match)],
+      confidence: noVowels.confidence,
+    };
+  } else return normal;
+}
+
+//! New: Consider: "Human" sanity check aka “Do these words
+// visibly resemble each other at all?”
+//    Downside --> may make the matching algorithm slower
+function hasOverlap(a: string, b: string) {
+  const minLen = 2;
+
+  for (let i = 0; i < a.length - minLen + 1; i++) {
+    const sub = a.slice(i, i + minLen);
+    if (b.includes(sub)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function fuzzy_match_product_line(
@@ -104,15 +147,13 @@ function fuzzy_match_product_line(
 ): Match {
   const terms = product_term.split(/\s+/);
 
-  let highest_confidence_match = fuzzy_match_term_vowels_and_none(
-    terms[0],
-    fuse,
-    devowelFuse,
-    items,
-    devoweledItems,
-  );
+  // ! New
+  let full_line_match = fuzzy_match_full_line(fuse, product_term);
 
-  for (let i = 1; i < terms.length; i++) {
+  let highest_confidence_match = full_line_match; // Default to full line is
+  // highest confidence
+
+  for (let i = 0; i < terms.length; i++) {
     const term_match = fuzzy_match_term_vowels_and_none(
       terms[i],
       fuse,
@@ -120,6 +161,26 @@ function fuzzy_match_product_line(
       items,
       devoweledItems,
     );
+    // ! New: Consider: Ignoring really short term matches with really high confidence
+    // since this is another case of anything really can match a few letters?
+    // if (
+    //   terms[i].length < 5 &&
+    //   term_match.confidence > 95 &&
+    //   term_match.match !== terms[i]
+    // ) {
+    //   // allow exact matches
+    //   continue;
+    // }
+
+    const single_term_weighted_confidence = term_match.confidence - 10;
+    // ! New: The full line match should be preferred over a single term match
+    // since it's more likely to be wrong, so make the confidence lower on
+    // the single term to give the full line a boost
+
+    // ! New: Consider: Human check
+    if (!hasOverlap(terms[i], term_match.match)) {
+      continue;
+    }
 
     if (term_match.confidence > highest_confidence_match.confidence) {
       highest_confidence_match = term_match;
@@ -127,6 +188,10 @@ function fuzzy_match_product_line(
   }
 
   return highest_confidence_match;
+}
+
+function determine_if_food(non_food_match: Match, food_match: Match) {
+  return non_food_match.confidence <= food_match.confidence;
 }
 
 // Master function. Calculates the match scores of non-food and food
@@ -154,14 +219,7 @@ function find_grocery_item(
     ITEMS,
     ITEMS_NO_VOWEL,
   );
-  console.log(
-    `cleaned Name: ${potential_term}\tfood: ${food_match.match}\tnon food: ${non_food_match.match}`,
-  );
   return { non_food_match, food_match };
-}
-
-function determine_if_food(non_food_match: Match, food_match: Match) {
-  return non_food_match.confidence <= food_match.confidence;
 }
 
 export default function process_text(
@@ -180,6 +238,19 @@ export default function process_text(
     foodFuse,
     foodDevowelFuse,
   );
+
+  // ! New: Give exact matches found in the db a VERY high score without bothering with the rest
+  for (const item of ITEMS) {
+    if (receipt_line.includes(item) && receipt_line !== "cheese") {
+      const matchItem = {
+        match: item,
+        confidence: 100,
+        isFood: true,
+      };
+
+      return matchItem;
+    }
+  }
 
   if (determine_if_food(non_food_match, food_match)) {
     return { ...food_match, isFood: true };

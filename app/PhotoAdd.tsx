@@ -64,8 +64,8 @@ export default function PhotoAdd() {
       });
 
       const text = await res.text();
-      const itemMatches = textToItemMatch(JSON.parse(text));
-      const guessedItems = await matchToEstimation(itemMatches);
+      const itemMatches = textToItemMatch(JSON.parse(text)); // Items have confidence, and original line
+      const guessedItems = await matchToEstimation(itemMatches); // Now contains optional confidence
 
       setGuessedItems(
         guessedItems.filter(
@@ -74,7 +74,7 @@ export default function PhotoAdd() {
             item.guessedItem.trim() !== "" &&
             item.guessedItem !== "undefined",
         ),
-      );
+      ); // Clean up the guessed items
 
       router.push({ pathname: "/DisplayResults" });
     } catch (err) {

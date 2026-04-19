@@ -10,6 +10,7 @@ import {
 } from "./schema";
 
 import * as Notifications from "expo-notifications";
+import { ADDITIONS, GENERIC_NAMES } from "./addedItemsV5";
 import { FOOD_INFO_DATA } from "./seedFoodInfo";
 
 export const DB_VERSION = 6;
@@ -134,6 +135,60 @@ export const runMigrations = async (db: SQLiteDatabase) => {
     await db.execAsync(CREATE_NOTIFICATIONS_TABLE);
 
     console.log("Creating new table to manage notification IDs");
-    await db.execAsync(`PRAGMA user_version = 10`);
+    await db.execAsync(`PRAGMA user_version = 9`);
+  }
+
+  if (currentVersion < 11) {
+    console.log("Adding Common Named Items to DB");
+    console.log(GENERIC_NAMES);
+    await db.withTransactionAsync(async () => {
+      const statement = await db.prepareAsync(`
+      INSERT INTO food_info
+      (name, name_no_vowels, days_fridge, days_pantry, days_freezer)
+      VALUES (?, ?, ?, ?, ?);
+    `);
+      try {
+        for (const item of GENERIC_NAMES) {
+          await statement.executeAsync([
+            item.name,
+            removeVowels(item.name),
+            item.days_fridge ?? null,
+            item.days_pantry ?? null,
+            item.days_freezer ?? null,
+          ]);
+        }
+      } finally {
+        await statement.finalizeAsync();
+      }
+    });
+
+    await db.execAsync(`PRAGMA user_version = 11`);
+  }
+
+  if (currentVersion < 12) {
+    console.log("Adding Common Named Items to DB V2...");
+    console.log(ADDITIONS);
+    await db.withTransactionAsync(async () => {
+      const statement = await db.prepareAsync(`
+      INSERT INTO food_info
+      (name, name_no_vowels, days_fridge, days_pantry, days_freezer)
+      VALUES (?, ?, ?, ?, ?);
+    `);
+      try {
+        for (const item of ADDITIONS) {
+          await statement.executeAsync([
+            item.name,
+            removeVowels(item.name),
+            item.days_fridge ?? null,
+            item.days_pantry ?? null,
+            item.days_freezer ?? null,
+          ]);
+        }
+      } finally {
+        await statement.finalizeAsync();
+      }
+    });
+
+    await db.execAsync(`PRAGMA user_version = 12`);
   }
 };

@@ -7,10 +7,13 @@ import { GuessProvider } from "../utils/GuessContext";
 
 import * as Notifications from "expo-notifications";
 
+import { Buffer } from "buffer";
 import { NotificationRequest } from "expo-notifications/build/Notifications.types";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { FoodProvider } from "../utils/FoodContext";
 import { NotificationsProvider } from "../utils/NotificationsContext";
+
+global.Buffer = Buffer; // To get autocomplete to work
 
 // Ensure notifications are shown even when the app is in the foreground
 Notifications.setNotificationHandler({
