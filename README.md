@@ -47,7 +47,7 @@ This button enables the user to add new groceries. When pressing it, the user wi
 
 ## Receipt Scanner
 
-Mr. Fridge will use ocular pattern recognition to determine the products listed on the reciept, and discard non food items, such as personal hygine products. After scanning the reciept, the user will be asked to decide the storage location of each item.
+Mr. Fridge will use ocular pattern recognition to determine the products listed on the reciept, and discard non food items, such as personal hygine products. After scanning the reciept, the user will be asked to decide the storage location of each item. Mr. Fridge calls an endpoint detailed [here](https://github.com/kpr0vence/tesseract-demo), and hosted on Railway.
 
 From there, an algorithm will be applied to determine the generic product type associated with each item, and the expected shelf life of the given product.
 This algorithm will be trained using data from the website [www.StillTasty.com](https://www.stilltasty.com/). It will have the flexibility to adjust predictions based on the storage location of the item (fridge, freezer, or pantry).
