@@ -1,79 +1,47 @@
-![Mr. Fridge Banner](./assets/images/mrFridgeBanner.png)
-Mr. Fridge’s is a grocery tracking app whose primary purpose is to issue notifications on items _before_ they become unusable. The app will strike a balance between convenience, user-friendliness, accuracy, and notification customization, to help users reduce food waste and save money on groceries.
 
-# Summary:
-- **Database design**: Items are stored in a single SQLite items table with id, name, ISO expiration_date, and a location_id enum (1 fridge, 2 pantry, 3 freezer), created and accessed via the shared SQLiteProvider instance.
-- **Data context**: DataContext wraps the app, loading all rows once from SQLite into React state, deriving per‑location lists and exposing CRUD + helper methods (expiration calculations, filters, counts) to the rest of the UI.
-- **Add form**:
-  - OCR step: The OCR flow starts from PhotoAdd, where the user picks an image, the app uploads it to a backend /ocr endpoint and gets back the parsed lines.
-  - Add form, item guesswork: The parser (parser.ts) runs fuzzy matching against known grocery/non‑food lists using Fuse.js to decide if each line is food and, if so, which item name to propose, producing initial GuessType items.
-  - Add form, validation form step: `DisplayResults` renders a list of `VerifyGuessFormItem` components where the user can edit each guessed name, location, and days‑until‑expiration (or delete/add items), and on final submit maps the confirmed guesses into ItemToAdd objects and calls handleSubmit to add them to the db table.
-- **Displaying items**: Screens that show groceries read from DataContext’s derived arrays (fridge, pantry, freezer, etc.), which are always kept in sync with SQLite so the UI reflects the current DB state.
+<table>
+  <tr>
+    <td>
+      <h1>Summary</h3>
+      <p>Mr. Fridge is a grocery tracking app built for iOS and Android that prioritizes convenience and clarity to make managing groceries and reducing food waste easy, effective, and completely free and accessible to all.</p>
+    </td>
+    <td>
+      <img src="assets/images/mrFridgeVectorLogo.svg" width="400" alt="Mr. Fridge Logo, featuring a fridge with a face wearing a tophat against a green background">
+    </td>
+  </tr>
+</table>
 
+
+## Main Features
+- A simple, readable design, that splits groceries into their storage location: Fridge, Pantry, or Freezer, and orders items by how close they are to expiration.
+- Two methods to enter groceries: Manual (single item) entry and a receipt scanner for entering multiple items.
+- A database of food items and the length of time they tend to last, built from information referencing [stillTasty.com](https://www.stilltasty.com/).
+  - This allows the app to make automatic estimates, so the user doesn’t have to go scouring each product for its expiration label and enter it into the app. 
+- Notifications on tracked items a few days before they’re predicted to expire, and once again at about the day they expire.
+
+# Findings / Testing
+Testing was conducted over a period of about a week and a half, and included both Android and iOS users. It focused on:
+- Convenience
+- Accuracy
+- Percieved benefit from the  Receipt Scanner
+- And whether or not Mr. Fridge met its goal of reducing food waste
+
+## Primary Finding
+My primary finding is that Mr. Fridge was successful in decreasing how often users forgot about food in their kitchen, especially how often they forgot about it until it went bad.
+
+When asked how often people forgot items until they went bad, responses ranged from "On Rare Ocassions" to "Sometimes" and "Often" when Mr. Fridge wasn't being used. While using Mr. Fridge, the responses began at "Never" (forgetting items until they went bad), and ranged up to "On Rare Ocassions" and "Sometimes."
+
+Users also reported that the expiration dates were accurate enough to be valuable, especially in tandem with the notifications. 
 
 # In Detail
-## Frontend
+## Architecture
+Mr. Fridge was built using React Native, Expo to handle building the code, maintianing metadata, and deployment and Expo Go for local development. It has a SQLite databse, and uses FastAPI and TesseractOCR for the singular endpoint hosted via Railway.
 
-The app is developed using React Native, specifically making use of the `(tabs)` file structure. The app is currently composed of two main tabs, and an additional button.
+## Receipt Scanenr
+The app takes the image the user submits and uploads it to the OCR endpoint. The image is preprocessed by upscaling it and making it grayscale to improve the accuracy of Tesseract's OCR. Once the text has been received by Mr. Fridge, a process of fuzzy matching occurs, matching whatever each line says to an item in the database. 
+- The OCR endpoint code is available [at this repository](https://github.com/kpr0vence/tesseract-demo).
 
-### 1. Groceries View
+_I developed this algorithm myself_ utilizing a library called fuse.js.
 
-The Groceries view displays the three sections that groceries can be stored in: **the Fridge, Pantry, and Freezer**.
-
-<div style="display: inline-flex; flex-direction: row; gap: 10px; align-items: center;">
-  <img src="./assets/images/exampleContainer.webp" alt="Example Container" style="height: 150px; border-radius: 10px;">
-  <p>Each one gives a preview of the number of items it contains as well as how many are close to expiration or are expired.</p>
-</div>
-
-_Screenshots from the dev version of Mr. Fridge_
-
-<div style="display: inline-flex; flex-direction: row; gap: 10px; align-items: center;">
-  <p>Clicking on any of these containers will show a details panel, listing each item. From here the user has the ability to edit the name or expiration length of any item, or mark it as "eaten".</p>
-  <img src="./assets/images/exampleContainerDetails.webp" alt="Example Container" style="height: 200px; border-radius: 10px;">
-  <img src="./assets/images/editModal.webp" alt="Edit items modal" style="height: 200px; border-radius: 10px;">
-</div>
-
-_Screenshots from the dev version of Mr. Fridge_
-
-<div style="display: inline-flex; flex-direction: row; gap: 10px; align-items: flex-start;">
-  <div>
-  
- ### 2. Center "Plus" Button
-
-This button enables the user to add new groceries. When pressing it, the user will be given the choice to:
-
-- Manually enter items, great for single-item entries _or leftovers_
-- Or to scan a reciept, which is great for mass entry and maximum convenience.
-
-## Receipt Scanner
-
-Mr. Fridge will use ocular pattern recognition to determine the products listed on the reciept, and discard non food items, such as personal hygine products. After scanning the reciept, the user will be asked to decide the storage location of each item. Mr. Fridge calls an endpoint detailed [here](https://github.com/kpr0vence/tesseract-demo), and hosted on Railway.
-
-From there, an algorithm will be applied to determine the generic product type associated with each item, and the expected shelf life of the given product.
-This algorithm will be trained using data from the website [www.StillTasty.com](https://www.stilltasty.com/). It will have the flexibility to adjust predictions based on the storage location of the item (fridge, freezer, or pantry).
-
-## Backend
-
-The backend uses SQLite to locally store user data in a table called items. Each Item record has:
-
-- id
-- name
-- expiration_date
-- location_id (either 1, 2, or 3 corresponding to fridge, pantry, or freezer)
-
-The SQLite database was set up using information from [this tutorial](https://www.youtube.com/watch?v=vgPdAARd6Gw). It creates up a users table/databse. I built off of this knowledge and functionality to create the table above. Of note: The SQLite queries are done following the proper guidelines to prevent basic SQL injection.
-
-After establishing the database, I found that the best way to provide app-wide access to the data and associated functions _and keep the information stateful_ was to create a new context, called `DataContext.tsx`. By wrapping the app in this, all components and tabs have access to the data and CRUD and other functions within `DataContext.tsx`. The component manages all SQLite queries and functions associated with the data, such as finding the number of items close to expiration.
-
-# Exporting
-
-Export App: `eas update --channel default`
-<img src="./assets/images/expoGo.png" alt="Expo Go App Launch QR Code" style="height: 200px; border-radius: 10px;">
-
-# Interacting with FastAPI
-
-1. Run the `update-env-ip.sh` script: `bash update-env-ip.sh`, which will set the host configuration parameters in your `.env` file based on your local network.
-
-2. When you run FastAPI, make sure you bind the server to 0.0.0.0 (which will work on your local computer and on the LAN like eduroam). (use the command `poetry run uvicorn main:app --reload --host 0.0.0.0` when running the tesseract-demo repo)
-
-It should work!
+# For the Future
+Mr. Fridge is still in its beta testing phase, though results have been positive, and the app is complete enough to deploy. Really now it’s just a bureaucratic issue that requires overcoming a few administrative hurdles to get it onto the app stores.
