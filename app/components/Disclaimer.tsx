@@ -1,8 +1,8 @@
 import { Image, Text, View } from "react-native";
 import * as Progress from "react-native-progress";
 
-// This "popup" could be changed into the "processing..." page while things are calculated
-// between getting the estimated product and finding the associated term spoilage time
+//  The little waiting disclaimer that is part of the OCR process
+// (has a parent component)
 export default function Disclaimer() {
   return (
     <View className="bg-gray-50 p-4 flex-col gap-2 rounded-md m-4 ">
@@ -29,6 +29,7 @@ export default function Disclaimer() {
         to add an item to the list.
       </Text>
       <View className="w-full flex-row justify-center">
+        {/* Progress bar! */}
         <Progress.Bar
           indeterminate={true}
           color={"#41d78f"}

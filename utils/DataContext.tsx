@@ -57,6 +57,7 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 // Helper functions in /utils/item.utils.ts
+// Handles logic for item storage
 export const DataProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -129,11 +130,12 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
       const addedItems = await database.getAllAsync<ItemType>(
         `INSERT INTO items (name, expiration_date, location_id) VALUES ${placeholders} RETURNING *;`,
         values,
-      ); // Modification: add a returning statement so I can then schedule notigs
+      ); // Modification: add a returning statement so I can then schedule notifs
 
       await database.execAsync("COMMIT;");
       await refreshData();
 
+      // Schedule new notification(s)
       if (addedItems) {
         for (const addedItem of addedItems) {
           await scheduleItemReminder(addedItem);

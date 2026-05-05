@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { Pressable, View } from "react-native";
 import LocationCard from "../components/LocationCard";
 
+// "Main View" with the fridge freezer and pantry sections
 export default function Index() {
   const locations = [
     {
@@ -24,13 +25,13 @@ export default function Index() {
         <Pressable
           key={index}
           onPress={() => {
-            // Navigate to that containers item display
+            // Navigate to that container's item display
             router.push({
               pathname: "/itemsDisplay",
               params: {
                 data: JSON.stringify(locationCard),
-              },
-            });
+              }, // Sending just the icon name and location name (which
+            }); // determines the behavior of the Location Card)
           }}
         >
           <LocationCard

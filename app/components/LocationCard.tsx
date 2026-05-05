@@ -26,6 +26,7 @@ function bottomRow(numNearExpired: number, numExpired: number) {
   );
 }
 
+// Renders the card for a location fridge, freezer, or pantry
 export default function LocationCard({
   location,
   iconName,

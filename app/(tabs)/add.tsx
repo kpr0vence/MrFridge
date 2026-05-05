@@ -5,7 +5,9 @@ import { useData } from "../../utils/DataContext";
 import { ItemToAdd, ItemType } from "../../utils/types";
 import EditOrManualAdd from "../components/EditOrManualAdd";
 
+// Entry point that hosts the manual and photo add components
 export default function Add() {
+  // Variables for manual add
   const { handleSubmit, handleUpdate } = useData();
   const [isModalVisable, setIsModalVisible] = useState<boolean>(false);
   const [actionSuccessful, setActionSuccessful] = useState<
@@ -29,6 +31,8 @@ export default function Add() {
     );
   }
 
+  // Submit behavior for the manual add modal.
+  // Clean the input and handle submit to the data context
   async function onSubmit(submissionItem: ItemToAdd) {
     if (
       submissionItem.name.trim() === "" ||
@@ -62,7 +66,6 @@ export default function Add() {
   // Acutal component
   return (
     <View className="bg-white">
-      {/* <View className="w-screen flex-row justify-around gap-5 p-4"> */}
       <View className="flex-col gap-4 p-4 items-center border-solid border-b-2 border-gray-200">
         <Pressable
           onPress={() => {
@@ -78,11 +81,13 @@ export default function Add() {
           Upload a Photo of your Receipt
         </Text>
         <Text className="mb-4 text-lg ">
-          Mr. Fridge will perform ocular character recognition to read the lines
-          on the receipt, and then estimate what grocery item each line
+          Mr. Fridge will perform optical character recognition to read the
+          lines on the receipt, and then estimate what grocery item each line
           represents, and how long it is expected to last.
         </Text>
       </View>
+
+      {/* Manual Add Code */}
       <View className="flex-col gap-4 p-4 items-center border-solid border-b-2 border-gray-200">
         <Pressable
           onPress={() => {

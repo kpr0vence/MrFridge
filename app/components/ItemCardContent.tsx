@@ -10,6 +10,8 @@ interface ItemCardContentProps {
   item: ItemType;
 }
 
+// Information in the opened state of the item card dropdown. Also
+// prepares the submission/update behavior passed into the edit/add modal
 export default function ItemCardContent({ item }: ItemCardContentProps) {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const { handleDelete, handleUpdate } = useData();

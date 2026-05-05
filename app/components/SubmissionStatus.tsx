@@ -2,6 +2,8 @@ import { Text, View } from "react-native";
 interface props {
   isSuccess: boolean;
 }
+
+// Confirmation that image -> items in storage was successful,
 export default function SubmissionStatus({ isSuccess }: props) {
   if (isSuccess) {
     return (

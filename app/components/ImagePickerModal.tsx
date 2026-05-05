@@ -11,6 +11,7 @@ interface imagePickerProps {
   photoToTextPost: () => Promise<void>;
 }
 
+// Popup modal to allow a user to choose an image from their photo library
 export default function ImagePickerModal({
   PlaceholderImage,
   selectedImage,
@@ -54,7 +55,6 @@ export default function ImagePickerModal({
 
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
-        // allowsEditing: true, // Lets you crop the image
         quality: 1,
         base64: true, // The format you want if you're sending the image to an api?
       });

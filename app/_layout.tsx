@@ -8,7 +8,6 @@ import { GuessProvider } from "../utils/GuessContext";
 import * as Notifications from "expo-notifications";
 
 import { Buffer } from "buffer";
-import { NotificationRequest } from "expo-notifications/build/Notifications.types";
 import React, { useEffect } from "react";
 import { FoodProvider } from "../utils/FoodContext";
 import { NotificationsProvider } from "../utils/NotificationsContext";
@@ -50,17 +49,26 @@ const requestNotificationPermissions = async () => {
   }
 };
 
-async function verifyNotificationsAreScheduled() {
-  const scheduled: NotificationRequest[] =
-    await Notifications.getAllScheduledNotificationsAsync();
-  console.log(`${scheduled.length} notifications scheduled`);
-}
-
+// Root Entry Point. Here I wrap the actual TSX in the custom contexts I've
+// made, as well as open the access to the DB (which has a table for the
+// generic food information, one for the stored items, and one for the
+// notifications)
 export default function RootLayout() {
   useEffect(() => {
     requestNotificationPermissions().catch(console.error);
-    // verifyNotificationsAreScheduled();
   }, []);
+
+  /*
+      CONTEXTS AND THEIR JOBS
+      - SQLiteProvider: Give everything within access to the DB
+      - FoodProvider: Handles logic related to interacting with the food_info table
+          - The contexts underneath (specifically GuessProvider) need access to this one
+      - NotificationsProvider: Handles all notification logic
+      - DataProvider: Handles all logic for the items a user stores
+      - GuessProvider: Handles most of the logic for going from lines (OCR-ed from the 
+        receipt) to estimations
+          - Needs access to some of the other contexts, so its the most nested
+  */
 
   return (
     <SQLiteProvider databaseName="test.db" onInit={createDbIfNeeded}>
@@ -91,6 +99,8 @@ export default function RootLayout() {
                   name="FailureSubmitMessage"
                   options={{ headerShown: false }}
                 />
+                {/* All possible screens, includes the ones in the tabs directory, as well as
+                other screens that while they do exist, can't be navigated to from the navigation payne */}
               </Stack>
             </GuessProvider>
           </DataProvider>

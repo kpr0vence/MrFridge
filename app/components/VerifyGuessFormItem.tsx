@@ -22,6 +22,12 @@ interface Props {
   removeItem: (id: number) => void;
 }
 
+// Form used after the OCR and item guessing to verify that
+// the guesses were correct and allow the user to submit those
+// items into storage. User can edit items, mark individual items
+// as correct, removce specific items, and submit all remaining items
+// Behind the scenes all items are sent at once, even if you mark
+// select ones as correct.
 export default function VerifyGuessFormItem({
   item,
   updateItem,
@@ -29,10 +35,9 @@ export default function VerifyGuessFormItem({
 }: Props) {
   const { estimateItemAtLocation, items } = useFoodData();
 
+  // Edit item modal things
   const foodItems = useMemo(() => items.map((i) => i.name), [items]);
-
   const [isVisible, setIsVisible] = useState(true);
-
   const [name, setName] = useState(item.guessedItem);
   const [estimation, setEstimation] = useState<number>(
     parseInt(item.daysTilExp) || 0,
@@ -40,7 +45,6 @@ export default function VerifyGuessFormItem({
   const [locationStatus, setLocationStatus] = useState<1 | 2 | 3>(
     item.location,
   );
-
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [debouncedName, setDebouncedName] = useState("");
 
@@ -125,6 +129,8 @@ export default function VerifyGuessFormItem({
     });
   }
 
+  // End Edit Item Modal Things
+
   function handleDelete() {
     removeItem(item.id);
     setIsVisible(false);
@@ -159,7 +165,7 @@ export default function VerifyGuessFormItem({
         <View>
           <View className="flex-row gap-3 items-center mb-4 justify-between p-5 pb-0">
             <View className="flex-col gap-4 flex-1 min-w-0">
-              {/* name (with suggestions) */}
+              {/* NAME INPUT (WITH AUTOCOMPLETE) */}
               <View className="bg-gray-200 rounded-md p-4 relative">
                 <TextInput
                   value={name}
@@ -221,7 +227,7 @@ export default function VerifyGuessFormItem({
               />
             </View>
 
-            {/* ESTIMATION */}
+            {/* ESTIMATION INPUT */}
             <View className="flex-col gap-4 w-1/2">
               <Text className="text-gray-800 text-lg font-bold text-center">
                 Estimated Days Until Spoilage
@@ -238,7 +244,7 @@ export default function VerifyGuessFormItem({
             </View>
           </View>
 
-          {/* ACTIONS */}
+          {/* BUTTONS */}
           <View className="flex-row gap-5 justify-center w-full mb-4">
             <Pressable
               onPress={handleDelete}

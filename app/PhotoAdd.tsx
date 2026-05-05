@@ -23,6 +23,7 @@ async function fetchApi(path: string, init: RequestInit): Promise<Response> {
 // -------------------------------------
 // Main Component
 // -------------------------------------
+// The page after the user clicks the photo add button
 export default function PhotoAdd() {
   const [selectedImage, setSelectedImage] = useState<string | undefined>(
     undefined,
@@ -35,6 +36,11 @@ export default function PhotoAdd() {
     setSelectedImage(undefined);
   }, []); // Clear image on reload
 
+  // Function responsible for calling the OCR API endpoint,
+  // and on success, using the Guess Context to make the returned
+  // text into fuzzy match (name) into full food info for matches
+  // And then routing to the page that has the human in the loop
+  // verification form
   const photoToTextPost = async () => {
     setProcessing(true);
     if (!selectedImage) {

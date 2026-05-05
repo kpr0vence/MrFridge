@@ -6,6 +6,10 @@ interface sectionContols {
   setActiveSection: Dispatch<SetStateAction<1 | 2 | 3>>;
 }
 
+// Used for the who/how/why section in "About"
+// Only controls the radio button group, and uses
+// the provided behavior (setActiveSection) on
+// selection change
 export default function SectionDialogueButtonGroup({
   activeSection,
   setActiveSection,

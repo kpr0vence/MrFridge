@@ -1,6 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { ScrollView, Text, View } from "react-native";
 
+// Why secition information
 export default function WhySection() {
   return (
     <View className="border-4 border-gray-200 rounded-lg m-4 bg-white p-4">

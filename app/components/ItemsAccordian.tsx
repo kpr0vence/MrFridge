@@ -9,6 +9,7 @@ interface ItemsAccordianProps {
   items: ItemType[];
 }
 
+// The container that holds all the individual item cards
 export default function ItemsAccordian({ items }: ItemsAccordianProps) {
   const [activeSections, setActiveSections] = useState([]);
 

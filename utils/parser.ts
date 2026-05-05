@@ -138,6 +138,9 @@ function hasOverlap(a: string, b: string) {
   return false;
 }
 
+// Function responsible for gathering all individual matches,
+// and comparing their confidences to pick the best option
+// Called twice by parent function (for food and non food matches)
 function fuzzy_match_product_line(
   product_term: string,
   fuse: Fuse<string>,
@@ -161,16 +164,6 @@ function fuzzy_match_product_line(
       items,
       devoweledItems,
     );
-    // ! New: Consider: Ignoring really short term matches with really high confidence
-    // since this is another case of anything really can match a few letters?
-    // if (
-    //   terms[i].length < 5 &&
-    //   term_match.confidence > 95 &&
-    //   term_match.match !== terms[i]
-    // ) {
-    //   // allow exact matches
-    //   continue;
-    // }
 
     const single_term_weighted_confidence = term_match.confidence - 10;
     // ! New: The full line match should be preferred over a single term match
@@ -194,7 +187,8 @@ function determine_if_food(non_food_match: Match, food_match: Match) {
   return non_food_match.confidence <= food_match.confidence;
 }
 
-// Master function. Calculates the match scores of non-food and food
+// Calculates the match scores of non-food and food
+// (parent of fuzzy_match_product_line)
 function find_grocery_item(
   receipt_line: string,
   ITEMS: string[],
@@ -222,6 +216,8 @@ function find_grocery_item(
   return { non_food_match, food_match };
 }
 
+// Master function that sets up the Fuse objects and gathers the food
+// and non food match, making the final decision
 export default function process_text(
   receipt_line: string,
   ITEMS: string[],

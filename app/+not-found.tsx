@@ -1,6 +1,8 @@
 import { Link, Stack } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
+// Back up 404 page (shouldn't really be possible since
+// you can't go to a URL in an app)
 export default function NotFoundScreen() {
   return (
     <>

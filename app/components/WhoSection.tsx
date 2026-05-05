@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 
+// Who seciton information
 export default function WhoSection() {
   const websiteURL = "https://github.com/kpr0vence/MrFridge";
   async function openGithubRepo() {

@@ -1,5 +1,6 @@
 import { ScrollView, Text, View } from "react-native";
 
+// How section text
 export default function HowSection() {
   return (
     <View className="border-4 border-gray-200 rounded-lg m-4 bg-white p-4">

@@ -9,6 +9,8 @@ import EditOrManualAdd from "./components/EditOrManualAdd";
 import AddHeader from "./components/headers/AddHeader";
 import VerifyGuessFormItem from "./components/VerifyGuessFormItem";
 
+// Parent container for the verify guess form. This is where the submission
+// behavior is defined
 export default function DisplayResults() {
   const { guessedItems } = useGuessData();
   const { handleSubmit } = useData();
@@ -16,15 +18,21 @@ export default function DisplayResults() {
 
   const [itemsToSave, setItemsToSave] = useState<GuessType[]>(guessedItems);
 
+  // When the guessedItems changes, update the associated state variable
+  // State variable is for
   useEffect(() => {
     setItemsToSave(guessedItems);
   }, [guessedItems]);
 
+  // If a user choose to remove an item (done in the verify guess form),
+  // filter it out of our itemsToSave state variable
   function removeItem(idToRemove: number) {
     const trimmedArr = itemsToSave.filter((item) => item.id != idToRemove);
     setItemsToSave(trimmedArr);
   }
 
+  // If a user updates an item (done in the verify guess form), find and update
+  // it in the itemsToSave state variable
   function updateItem(idToUpdate: number, newItem: GuessType) {
     // Do stuff
     const updatedInfoArr = itemsToSave.map((item) => {
@@ -42,6 +50,7 @@ export default function DisplayResults() {
     };
   }
 
+  // Function used in iteration to make new items to save
   function onNewItemSubmit(item: ItemToAdd) {
     const newItem: GuessType = {
       id: itemsToSave.length,
@@ -54,9 +63,8 @@ export default function DisplayResults() {
   }
 
   const onFinalSubmit = async () => {
-    // on finsal submit, all items remaining should be added to the form items
+    // on final submit, all items remaining should be added to the form items
     // Final submit should also make sure no items with bad params are added
-
     const itemsToSubmit: ItemToAdd[] = itemsToSave
       .filter((item) => item.guessedItem.trim() !== "")
       .map((item) => makeItem(item));
@@ -96,6 +104,9 @@ export default function DisplayResults() {
           contentContainerStyle={{ flexGrow: 1 }} // Ensures content can grow
           className=" flex-col gap-5 bg-white m-5 rounded-md"
         >
+          {/* ^^ thank goodness for this component */}
+
+          {/* Part responsible for rendering each guess */}
           <View id="form-container">
             {itemsToSave.map((guessedItem) => {
               return (
@@ -108,6 +119,8 @@ export default function DisplayResults() {
               );
             })}
           </View>
+
+          {/* Action Items / Buttons */}
           <View className="flex items-center justify-center">
             <Pressable
               onPress={() => setIsModalVisible(true)}

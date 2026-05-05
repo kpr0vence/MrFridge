@@ -5,6 +5,7 @@ import HowSection from "../components/HowSection";
 import WhoSection from "../components/WhoSection";
 import WhySection from "../components/WhySection";
 
+// Has the who, how, and why sections
 export default function AboutScreen() {
   const [activeSection, setActiveSection] = useState<1 | 2 | 3>(1);
 
@@ -18,8 +19,6 @@ export default function AboutScreen() {
       {activeSection === 1 ? <WhoSection /> : <></>}
       {activeSection === 2 ? <HowSection /> : <></>}
       {activeSection === 3 ? <WhySection /> : <></>}
-
-      {/* <GeneralNotifsTest /> */}
     </View>
   );
 }

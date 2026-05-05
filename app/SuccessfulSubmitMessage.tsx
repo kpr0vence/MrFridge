@@ -3,6 +3,8 @@ import { useEffect } from "react";
 import { Text, View } from "react-native";
 import AddHeader from "./components/headers/AddHeader";
 
+// Reports submission status of image -> items, then
+// automatically routes to the homepage (items display)
 export default function SuccessfulSubmitMessage() {
   useEffect(() => {
     const timerId = setTimeout(() => {

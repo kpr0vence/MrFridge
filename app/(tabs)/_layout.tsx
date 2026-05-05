@@ -5,6 +5,7 @@ import AboutHeader from "../components/headers/AboutHeader";
 import AddHeader from "../components/headers/AddHeader";
 import GroceryHeader from "../components/headers/GroceryHeader";
 
+// Controls the tabs visible on the bottom of the screen (and their headers)
 export default function TabLayout() {
   return (
     <Tabs

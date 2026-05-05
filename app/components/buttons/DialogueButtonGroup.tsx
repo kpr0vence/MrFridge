@@ -1,6 +1,6 @@
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import React, { Dispatch, SetStateAction } from "react";
 import { Pressable, View } from "react-native";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 interface props {
   location: 1 | 2 | 3;
@@ -8,22 +8,25 @@ interface props {
   locationChange: (newLocation: 1 | 2 | 3) => void;
 }
 
+// The dialogue buttons for location (fridge, pantry freezer)
+// Takes in the variables used to track the change, and manages
+// the logic for it in this component.
 export default function DialogueButtonGroup({
   location,
   setLocation,
   locationChange,
 }: props) {
+  // Variable so that I can use it in the bacground color funciton
   const viewDetails = "rounded-full p-2 items-center justify-center";
-  //   const [selectedLocation, setSelectedLocation] = useState<number>(3);
-  // Make a state variable to track which one is toggled
-  // of three options one will be toggled, the rest wont. On press, update the toggle
 
+  // Controls if this is the green (aka active) selection or not
   function determineBackgroundColor(newLocation: 1 | 2 | 3) {
     return newLocation === location
       ? viewDetails + " bg-[#41d78f]"
       : viewDetails + " bg-slate-200";
   }
 
+  // Icon color controller
   function determineForegroundColor(newLocation: 1 | 2 | 3) {
     return newLocation === location ? "#fff" : "#9ca3af";
   }

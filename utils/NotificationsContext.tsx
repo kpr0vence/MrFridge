@@ -13,6 +13,8 @@ interface NotificationsContextType {
 const NotificationsContext = createContext<
   NotificationsContextType | undefined
 >(undefined);
+
+// Context responsible for notification logic
 export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -41,7 +43,7 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
     console.log("Daily 9 AM reminder scheduled.");
   }
 
-  // Get all stored notif id's associated with an food id
+  // Get all stored notif id's associated with a food id
   async function getAllNotifIdsForItem(item: ItemType): Promise<string[]> {
     const results = await database.getAllAsync<NotificationTableType>(
       `SELECT * FROM notifications WHERE food_info_id = ?`,
@@ -58,6 +60,7 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
     );
   }
 
+  // Helper Functions
   function generateThreeDayMessage(item: ItemType): string {
     const itemTitleCase =
       item.name.charAt(0).toUpperCase() + item.name.slice(1);
@@ -96,7 +99,7 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
   async function scheduleThreeDayReminder(item: ItemType) {
     if ((await Notifications.getAllScheduledNotificationsAsync()).length > 50) {
       return;
-    } // iOS caps at 64 scheduled notifs, this is a short term solution
+    } // iOS caps at 64 scheduled notifs, consider longer term solutions
 
     const threeDaysTilExp: Date = generateThreeDaysTillExp(item);
     const now = new Date();
@@ -155,7 +158,7 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
 
   // Responsible for making a three day and same day notif
   async function scheduleItemReminder(item: ItemType) {
-    await removeItemReminder(item);
+    await removeItemReminder(item); // Canceling any that already existed for that item
     await scheduleThreeDayReminder(item);
     await scheduleNowReminder(item);
   }

@@ -1,10 +1,12 @@
 import { useLocalSearchParams } from "expo-router";
 import { ScrollView, View } from "react-native";
+import { useData } from "../utils/DataContext";
 import BackButton from "./components/buttons/BackButton";
 import ItemsDisplayHeader from "./components/headers/ItemsDisplayHeader";
 import ItemsAccordian from "./components/ItemsAccordian";
-import { useData } from "../utils/DataContext";
 
+// Takes the location name to get associated data and render it
+// (The details page for one specific location)
 export default function ItemsDisplay() {
   const { getDataFromLocation } = useData();
   const { data } = useLocalSearchParams();

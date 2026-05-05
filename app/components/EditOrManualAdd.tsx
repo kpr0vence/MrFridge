@@ -26,6 +26,8 @@ interface props {
   onUpdate?: (item: ItemType) => void;
 }
 
+// Modal for editing OR adding a single item. The behavior
+// changes based on if editMode is true or false
 export default function EditOrManualAdd({
   editMode,
   originalItem,
@@ -36,6 +38,8 @@ export default function EditOrManualAdd({
   const { estimateItemAtLocation, items } = useFoodData();
 
   const foodItems = useMemo(() => items.map((item) => item.name), [items]);
+  // Items are all of the possible items in the database. I need it to make
+  // the autocomplete dropdown
 
   const [name, setName] = useState("");
   const [estimation, setEstimation] = useState("0");
@@ -59,6 +63,8 @@ export default function EditOrManualAdd({
     setShowSuggestions(false);
   }
 
+  // Upon recieving an original item (and it's in edit mode) prefill
+  // the form values with the previously existing info.
   useEffect(() => {
     if (originalItem && editMode) {
       setName(originalItem.name);
@@ -69,6 +75,7 @@ export default function EditOrManualAdd({
     }
   }, [originalItem]);
 
+  // Triggers on open
   useEffect(() => {
     // Clean form on reopen
     resetToDefaults();
@@ -81,6 +88,8 @@ export default function EditOrManualAdd({
     }
   }, []);
 
+  // Once the user finishes typing the name in, see if I can
+  // get a match in the DB to get an automatic expiration estimation
   async function handleNameEditEnd(input: string) {
     if (!input) return;
 
@@ -94,6 +103,8 @@ export default function EditOrManualAdd({
     }
   }
 
+  // If the location changes, I need to change the exp. estimation
+  // if the item was something in the DB
   async function handleLocationChange(newLocation: 1 | 2 | 3) {
     setLocationStatus(newLocation);
 
@@ -109,6 +120,9 @@ export default function EditOrManualAdd({
     }
   }
 
+  // Doesn't handle the actual submission logic
+  // just calls the functions passed down from the
+  // parent to do so
   function handleSubmit() {
     if (editMode && originalItem && onUpdate) {
       const updateItem: ItemType = {
@@ -150,6 +164,7 @@ export default function EditOrManualAdd({
   const suggestions =
     name.length > 0 && !exactMatch ? [`Use "${name}"`, ...filtered] : filtered;
 
+  // Actually returned component
   return (
     <Modal
       animationType="fade"
@@ -166,6 +181,7 @@ export default function EditOrManualAdd({
         <View className="flex-1 items-center justify-center bg-black/50">
           <View className="bg-white rounded-md w-4/5 gap-4 p-5">
             <View className="w-full  flex-row items-center  gap-4">
+              {/* NAME INPUT FIELD */}
               <Text className="text-gray-800 text-xl font-bold mb-2">Name</Text>
 
               <View className="relative w-[80%]">
@@ -183,6 +199,7 @@ export default function EditOrManualAdd({
                   className="bg-gray-200 rounded-md px-3 py-3 text-gray-700"
                 />
 
+                {/* AUTOCOMPLETE SUGGESTIONS */}
                 {showSuggestions && suggestions.length > 0 && (
                   <View className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md max-h-48 z-50">
                     <FlatList
@@ -221,7 +238,7 @@ export default function EditOrManualAdd({
               </View>
             </View>
 
-            {/* ESTIMATION */}
+            {/* ESTIMATION INPUT FIELD*/}
             <View className="flex-row gap-4 items-center">
               <TextInput
                 value={estimation}
@@ -236,7 +253,7 @@ export default function EditOrManualAdd({
               </Text>
             </View>
 
-            {/* LOCATION */}
+            {/* LOCATION INPUT FIELD */}
             <View className="flex-row items-center gap-4">
               <Text className="text-gray-800 text-xl font-bold">Stored In</Text>
               <DialogueButtonGroup
@@ -246,7 +263,7 @@ export default function EditOrManualAdd({
               />
             </View>
 
-            {/* ACTIONS */}
+            {/* BUTTONS */}
             <View className="flex-row justify-between">
               <Pressable
                 onPress={() => {

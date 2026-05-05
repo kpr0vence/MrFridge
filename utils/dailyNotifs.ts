@@ -2,6 +2,8 @@ import * as Notifications from "expo-notifications";
 
 const DAILY_NOTIFICATION_ID = "daily-kitchen-reminder";
 
+// Handles actually scheduling the notifications (interacts
+// with the Notification context
 export async function scheduleDailyReminder() {
   // Cancel existing ones to avoid duplicates
   await Notifications.cancelAllScheduledNotificationsAsync();

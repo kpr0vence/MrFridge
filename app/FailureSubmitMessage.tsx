@@ -3,6 +3,8 @@ import { useEffect } from "react";
 import { Text, View } from "react-native";
 import AddHeader from "./components/headers/AddHeader";
 
+// Reports the condition of the image -> items upload,
+// then routes to homescreen
 export default function SuccessfulSubmitMessage() {
   useEffect(() => {
     const timerId = setTimeout(() => {

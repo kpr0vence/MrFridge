@@ -17,13 +17,18 @@ interface GuessContextType {
 }
 
 const GuessContext = createContext<GuessContextType | undefined>(undefined);
+
+// Handles the process of taking raw lines of text and converting them
+// into guessed items (with all the info that comes with)
+// Interacts heavily with the food context
 export const GuessProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [guessedItems, setGuessedItems] = useState<GuessType[]>([]);
   const { parseName, estimateItem } = useFoodData();
 
-  // get the lines and then call /parser.ts parse_text() function per line, storing the results
+  // get the lines and then call /parser.ts parse_text() function (using the food data hook)
+  // per line, storing the results
   function textToItemMatch(textObj: any): MatchItem[] {
     const lines = textObj.lines;
     const itemNames: MatchItem[] = lines

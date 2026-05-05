@@ -24,6 +24,8 @@ export default function ImageViewer(props: Props) {
   return tsx;
 }
 
+// Code for the image picker was taken from Expo's tutorial, which is why
+// its not using NativeWind
 const styles = StyleSheet.create({
   imageContainer: {
     flex: 1, // shorthand for the flex-grow property <-- specifies how much of the available

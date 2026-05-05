@@ -1,3 +1,4 @@
+// list for non-food matchs
 export const NonFoodItems: string[] = [
   "special",
   "cash",

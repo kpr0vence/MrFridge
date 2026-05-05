@@ -20,6 +20,9 @@ function daysBubbleColor(
   return "bg-[#41d78f] rounded-full justify-center items-center h-12 w-12";
 }
 
+// The unopened state of the individual item card. Has to calculate
+// if the bubble next to the name should be green, yellow, or orange
+// And present the calculated days until expiration
 export default function ItemCardHeader({
   item,
   isActive,
@@ -29,6 +32,7 @@ export default function ItemCardHeader({
   const daysLeft = calculateDaysTilExp(item.expiration_date);
   const classNameClosed: string =
     "border-4 border-gray-200 rounded-lg w-full flex-row justify-between items-center p-2 gap-2 mb-4";
+  // Unround the bottom corners when the dropdown is opened
   const classNameOpen: string =
     "border-4 border-b-2 border-gray-200 rounded-t-lg w-full flex-row justify-between items-center p-2 gap-2";
 

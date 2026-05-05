@@ -7,6 +7,9 @@ interface itemsDisplayHeaderProps {
   items: ItemType[];
 }
 
+// Header for the location card's details page.
+// Presents how many items in that location are
+// expired or close to it
 export default function ItemsDisplayHeader({
   locationName,
   items,

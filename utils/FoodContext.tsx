@@ -34,6 +34,8 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const database = useSQLiteContext();
 
+  // State variables for the full information and just the names (used
+  // during the fuzzy matching)
   const [items, setItems] = useState<FoodContextInfo[]>([]);
   const [names, setNames] = useState<string[]>([]);
   const [namesNoVowels, setNamesNoVowels] = useState<string[]>([]);
@@ -49,7 +51,7 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({
       setNamesNoVowels(result.map((item) => item.name_no_vowels));
     },
     [database],
-  );
+  ); // Load the state variables anytime the database is updated
 
   useEffect(() => {
     let mounted = true;
@@ -60,7 +62,8 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({
     };
   }, [loadData]); // Load the mounted data if the db data chages
 
-  // Takes over the task of calling parser.py to allow it to pass in the new info
+  // Takes over the task of calling parser.py function
+  // to allow it to pass in the new info
   function parseName(line: string) {
     const guess = process_text(line, names, namesNoVowels);
     /*
@@ -71,8 +74,8 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({
     return guess;
   }
 
+  // Given the name, get it's match from the db
   async function estimateItem(name: string) {
-    // Given the name, get it's match from the db
     let estimate: Estimation = {
       locationId: 1,
       estimation: 7,
@@ -105,6 +108,8 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({
     return estimate;
   }
 
+  // If the location id is updated or already input, we need to find the estimation
+  // at specifically that location
   async function estimateItemAtLocation(name: string, locationId: 1 | 2 | 3) {
     let estimate: Estimation = {
       locationId: 1,
