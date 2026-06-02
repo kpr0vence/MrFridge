@@ -11,6 +11,7 @@
   </tr>
 </table>
 
+**Note: The server for the receipt reading is no longer being hosted.**
 
 ## Main Features
 - A simple, readable design, that splits groceries into their storage location: Fridge, Pantry, or Freezer, and orders items by how close they are to expiration.
